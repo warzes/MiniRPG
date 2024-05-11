@@ -11,11 +11,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="glad\gl.c" />
+    <ClCompile Include="glad\wgl.c" />
     <ClCompile Include="glm\detail\glm.cpp" />
     <ClCompile Include="stb\stb.cpp" />
     <ClCompile Include="tiny_obj_loader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="glad\gl.h" />
+    <ClInclude Include="glad\wgl.h" />
     <ClInclude Include="glmHeader.h" />
     <ClInclude Include="glm\common.hpp" />
     <ClInclude Include="glm\detail\compute_common.hpp" />

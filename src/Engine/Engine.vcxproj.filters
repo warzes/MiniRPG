@@ -2,29 +2,38 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="BaseApp.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderApp.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
     <ClCompile Include="EngineApp.cpp">
       <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="LogSystem.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowSystem.cpp">
+      <Filter>Platform</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Base.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseApp.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderApp.h">
-      <Filter>Render</Filter>
-    </ClInclude>
     <ClInclude Include="EngineApp.h">
       <Filter>App</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowsInclude.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="LogSystem.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowSystem.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -36,6 +45,9 @@
     </Filter>
     <Filter Include="Render">
       <UniqueIdentifier>{9ceec541-d26f-4dfc-9466-54f5e8539915}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform">
+      <UniqueIdentifier>{531bf4ee-0294-4396-ba8c-ba58b18acaa8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

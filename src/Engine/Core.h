@@ -1,5 +1,9 @@
 #pragma once
 
+//==============================================================================
+// MACROS
+//==============================================================================
+
 // Turn argument to string constant:
 // https://gcc.gnu.org/onlinedocs/cpp/Stringizing.html#Stringizing
 #define SE_STRINGIZE( _n )   SE_STRINGIZE_2( _n )
@@ -17,6 +21,10 @@
 #endif
 #if defined(__EMSCRIPTEN__)
 #endif
+
+//==============================================================================
+// INLINE FUNC
+//==============================================================================
 
 // Implementation from "08/02/2015 Better array 'countof' implementation with C++ 11 (updated)" - https://www.g-truc.net/post-0708.html
 template<typename T, size_t N>
@@ -38,3 +46,9 @@ template<typename Result, typename Original>
 {
 	return reinterpret_cast<Result>(reinterpret_cast<void*>(fptr));
 }
+
+//==============================================================================
+// CORE FUNC
+//==============================================================================
+
+void Exit();

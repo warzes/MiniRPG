@@ -25,6 +25,9 @@
     <Filter Include="tiny_obj_loader">
       <UniqueIdentifier>{5256ad19-8851-49a0-9f17-692fd1772333}</UniqueIdentifier>
     </Filter>
+    <Filter Include="glad">
+      <UniqueIdentifier>{01b6e3f7-eebf-406e-9a00-d8df38879b41}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="glm\common.hpp">
@@ -928,6 +931,12 @@
     <ClInclude Include="tiny_obj_loader.h">
       <Filter>tiny_obj_loader</Filter>
     </ClInclude>
+    <ClInclude Include="glad\gl.h">
+      <Filter>glad</Filter>
+    </ClInclude>
+    <ClInclude Include="glad\wgl.h">
+      <Filter>glad</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glm\detail\glm.cpp">
@@ -938,6 +947,12 @@
     </ClCompile>
     <ClCompile Include="tiny_obj_loader.cpp">
       <Filter>tiny_obj_loader</Filter>
+    </ClCompile>
+    <ClCompile Include="glad\gl.c">
+      <Filter>glad</Filter>
+    </ClCompile>
+    <ClCompile Include="glad\wgl.c">
+      <Filter>glad</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
