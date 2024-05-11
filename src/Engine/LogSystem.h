@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Systems.h"
 
@@ -15,3 +15,9 @@ public:
 private:
 	Systems& m_systems;
 };
+
+// TODO: временно, потом убрть
+void LogPrint(const std::string& message);
+void LogWarning(const std::string& message);
+void LogError(const std::string& message);
+void LogFatal(const std::string& message);

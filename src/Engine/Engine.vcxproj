@@ -95,7 +95,12 @@
   <ItemGroup>
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="EngineApp.cpp" />
+    <ClCompile Include="Image.cpp" />
     <ClCompile Include="LogSystem.cpp" />
+    <ClCompile Include="RenderCore.cpp" />
+    <ClCompile Include="RenderResources.cpp" />
+    <ClCompile Include="RenderSystem.cpp" />
+    <ClCompile Include="RenderSystem_Shader.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -105,7 +110,11 @@
   <ItemGroup>
     <ClInclude Include="Core.h" />
     <ClInclude Include="EngineApp.h" />
+    <ClInclude Include="Image.h" />
     <ClInclude Include="LogSystem.h" />
+    <ClInclude Include="RenderCore.h" />
+    <ClInclude Include="RenderResources.h" />
+    <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Systems.h" />
     <ClInclude Include="WindowsInclude.h" />

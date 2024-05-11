@@ -14,6 +14,21 @@
     <ClCompile Include="WindowSystem.cpp">
       <Filter>Platform</Filter>
     </ClCompile>
+    <ClCompile Include="RenderSystem.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderCore.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderResources.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Image.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem_Shader.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -33,6 +48,18 @@
       <Filter>Platform</Filter>
     </ClInclude>
     <ClInclude Include="Systems.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderSystem.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderCore.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderResources.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Image.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>

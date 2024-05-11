@@ -16,10 +16,16 @@
 #endif
 
 #if defined(_WIN32)
+#	define PLATFORM_DESKTOP 1
+#	define PLATFORM_EMSCRIPTEN 0
 #endif
 #if defined(__linux__)
+#	define PLATFORM_DESKTOP 1
+#	define PLATFORM_EMSCRIPTEN 0
 #endif
 #if defined(__EMSCRIPTEN__)
+#	define PLATFORM_DESKTOP 0
+#	define PLATFORM_EMSCRIPTEN 1
 #endif
 
 //==============================================================================

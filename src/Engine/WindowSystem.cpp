@@ -276,13 +276,6 @@ bool WindowSystem::Create(const WindowSystemCreateInfo& createInfo)
 		return false;
 	}
 
-	std::string ContextText = "RENDER SYSTEM:";
-	ContextText += "\n\t\tRENDERER: " + std::string((const char*)glGetString(GL_RENDERER));
-	ContextText += "\n\t\tVENDOR:   " + std::string((const char*)glGetString(GL_VENDOR));
-	ContextText += "\n\t\tVERSION:  " + std::string((const char*)glGetString(GL_VERSION));
-	ContextText += "\n\t\tSHADING VERSION: " + std::string((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
-	m_systems.log->Print(ContextText);
-
 	m_shouldQuit = false;
 
 	return true;
@@ -300,6 +293,7 @@ void WindowSystem::Destroy()
 	m_deviceContext = nullptr;
 	m_hwnd = nullptr;
 	m_hInstance = nullptr;
+	m_systems.window = nullptr;
 }
 //-----------------------------------------------------------------------------
 bool WindowSystem::PeekMessages()
@@ -324,5 +318,15 @@ void WindowSystem::SwapBuffers()
 bool WindowSystem::ShouldQuit() const
 {
 	return m_shouldQuit;
+}
+//-----------------------------------------------------------------------------
+uint32_t WindowSystem::GetWidth() const
+{
+	return m_frameWidth;
+}
+//-----------------------------------------------------------------------------
+uint32_t WindowSystem::GetHeight() const
+{
+	return m_frameHeight;
 }
 //-----------------------------------------------------------------------------

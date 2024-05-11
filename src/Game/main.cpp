@@ -12,8 +12,10 @@ int main(
 	Systems systems;
 	LogSystem log(systems);
 	WindowSystem window(systems);
+	RenderSystem render(systems);
 
 	window.Create({});
+	render.Create({});
 
 	while (1)
 	{
@@ -21,11 +23,12 @@ int main(
 		if (window.PeekMessages())
 			continue;
 
-		glClearColor(0.2f, 0.4f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		window.SwapBuffers();
+		render.BeginFrame();
+
+		render.EndFrame();
 	}
 
+	render.Destroy();
 	window.Destroy();
 }
 //-----------------------------------------------------------------------------
