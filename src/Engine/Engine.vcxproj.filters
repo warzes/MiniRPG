@@ -47,6 +47,18 @@
     <ClCompile Include="Mouse.cpp">
       <Filter>Platform</Filter>
     </ClCompile>
+    <ClCompile Include="Clock.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="FileInputStream.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryInputStream.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Sleep.cpp">
+      <Filter>Platform</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -101,6 +113,30 @@
     <ClInclude Include="Mouse.h">
       <Filter>Platform</Filter>
     </ClInclude>
+    <ClInclude Include="PlatformEvent.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="Clock.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineTime.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="InputStream.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="FileInputStream.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryInputStream.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="TemporaryWindow.h">
+      <Filter>Platform\priv</Filter>
+    </ClInclude>
+    <ClInclude Include="Sleep.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -117,6 +153,9 @@
     </Filter>
     <Filter Include="Graphics">
       <UniqueIdentifier>{d97133bd-8f8c-4c0f-adde-a5e086c23c8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform\priv">
+      <UniqueIdentifier>{c708819e-d80c-48ae-b487-b63f7b363cea}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

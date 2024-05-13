@@ -69,3 +69,8 @@ void Mouse::SetPosition(const glm::ivec2& position, const WindowSystem& relative
 	}
 }
 //-----------------------------------------------------------------------------
+void Mouse::SetPositionCentre(const WindowSystem& relativeTo)
+{
+	SetPosition({ relativeTo.GetWidth() / 2, relativeTo.GetHeight() / 2 }, relativeTo);
+}
+//-----------------------------------------------------------------------------

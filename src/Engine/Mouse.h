@@ -33,6 +33,6 @@ namespace Mouse
 	void SetPosition(const glm::ivec2& position);
 	// Set the current position of the mouse in window coordinates
 	void SetPosition(const glm::ivec2& position, const WindowSystem& relativeTo);
-
+	void SetPositionCentre(const WindowSystem& relativeTo);
 
 }

@@ -7,15 +7,21 @@
 
 #include <cassert>
 #include <string>
+#include <ratio>
 #include <algorithm>
+#include <filesystem>
+#include <chrono>
 #include <fstream>
 #include <sstream>
+#include <variant>
+#include <queue>
 #include <array>
 #include <span>
 #include <vector>
 #include <unordered_map>
 
 #include "WindowsInclude.h"
+#include <mmsystem.h>
 
 #include <glad/gl.h>
 #include <glad/wgl.h>

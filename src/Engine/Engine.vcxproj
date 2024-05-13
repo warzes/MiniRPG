@@ -93,12 +93,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Clock.cpp" />
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="EngineApp.cpp" />
     <ClCompile Include="EngineString.cpp" />
+    <ClCompile Include="FileInputStream.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="LogSystem.cpp" />
+    <ClCompile Include="MemoryInputStream.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="RenderCamera.cpp" />
     <ClCompile Include="RenderCore.cpp" />
@@ -107,6 +110,7 @@
     <ClCompile Include="RenderSystem_Buffer.cpp" />
     <ClCompile Include="RenderSystem_Shader.cpp" />
     <ClCompile Include="RenderSystem_State.cpp" />
+    <ClCompile Include="Sleep.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -114,21 +118,29 @@
     <ClCompile Include="WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Clock.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="DebugNew.h" />
     <ClInclude Include="EngineApp.h" />
     <ClInclude Include="EngineString.h" />
+    <ClInclude Include="EngineTime.h" />
     <ClInclude Include="EnumArray.h" />
+    <ClInclude Include="FileInputStream.h" />
     <ClInclude Include="Image.h" />
+    <ClInclude Include="InputStream.h" />
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="LogSystem.h" />
+    <ClInclude Include="MemoryInputStream.h" />
     <ClInclude Include="Mouse.h" />
+    <ClInclude Include="PlatformEvent.h" />
     <ClInclude Include="RenderCamera.h" />
     <ClInclude Include="RenderCore.h" />
     <ClInclude Include="RenderResources.h" />
     <ClInclude Include="RenderSystem.h" />
+    <ClInclude Include="Sleep.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Systems.h" />
+    <ClInclude Include="TemporaryWindow.h" />
     <ClInclude Include="Utf.h" />
     <ClInclude Include="WindowsInclude.h" />
     <ClInclude Include="WindowSystem.h" />

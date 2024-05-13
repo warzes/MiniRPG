@@ -24,33 +24,6 @@ int main(
 	GeometryBufferRef m_geom;
 	Texture2DRef m_texture;
 
-	const char* vertexShaderText = R"(
-layout(location = 0) in vec3 aPosition;
-layout(location = 1) in vec2 aTexCoord;
-
-uniform mat4 ProjectionMatrix;
-
-out vec2 TexCoord;
-
-void main()
-{
-	gl_Position = ProjectionMatrix * vec4(aPosition, 1.0);
-	TexCoord    = aTexCoord;
-}
-)";
-
-	const char* fragmentShaderText = R"(
-in vec2 TexCoord;
-out vec4 FragmentColor;
-
-uniform sampler2D DiffuseTexture;
-
-void main()
-{
-	FragmentColor = texture(DiffuseTexture, TexCoord);
-}
-)";
-
 	struct Vertex
 	{
 		glm::vec3 pos;
@@ -70,8 +43,36 @@ void main()
 
 	//glEnable(GL_CULL_FACE); // для теста - квад выше против часой стрелки
 
-	m_shader = render.CreateShaderProgram({ vertexShaderText }, { fragmentShaderText });
-	m_uniformProjectionMatrix = render.GetUniform(m_shader, "ProjectionMatrix");
+	{
+		const char* vertexShaderText = R"(
+layout(location = 0) in vec3 aPosition;
+layout(location = 1) in vec2 aTexCoord;
+
+uniform mat4 ProjectionMatrix;
+
+out vec2 TexCoord;
+
+void main()
+{
+	gl_Position = ProjectionMatrix * vec4(aPosition, 1.0);
+	TexCoord    = aTexCoord;
+}
+)";
+
+		const char* fragmentShaderText = R"(
+in vec2 TexCoord;
+out vec4 FragmentColor;
+
+uniform sampler2D DiffuseTexture;
+
+void main()
+{
+	FragmentColor = texture(DiffuseTexture, TexCoord);
+}
+)";
+		m_shader = render.CreateShaderProgram({ vertexShaderText }, { fragmentShaderText });
+		m_uniformProjectionMatrix = render.GetUniform(m_shader, "ProjectionMatrix");
+	}
 
 	m_geom = render.CreateGeometryBuffer(BufferUsage::StaticDraw,
 		static_cast<unsigned>(Countof(vert)), static_cast<unsigned>(sizeof(Vertex)), vert,
@@ -261,12 +262,42 @@ void main()
 	}
 
 	glm::ivec2 prevPos = Mouse::GetPosition(window);
+	glm::ivec2 lastMousePosition = Mouse::GetPosition(window);
+
+	m_perspective = glm::perspective(glm::radians(45.0f), (float)window.GetWidth() / (float)window.GetHeight(), 0.01f, 100.f);
+	render.SetViewport(window.GetWidth(), window.GetHeight());
 
 	while (1)
 	{
 		if (window.ShouldQuit()) break;
-		if (window.PeekMessages())
-			continue;
+		//if (window.PeekMessages())
+		//	continue;
+		// Process events
+		while (const auto event = window.PollEvent())
+		{
+			// Close window: exit
+			if (event.Is<Event::Closed>())
+				Exit();
+
+			// Escape key: exit
+			if (const auto* keyPressed = event.GetIf<Event::KeyPressed>())
+				if (keyPressed->code == Keyboard::Key::Escape)
+					Exit();
+
+			// Resize event: adjust the viewport
+			if (const auto* resized = event.GetIf<Event::Resized>())
+			{
+				const auto [width, height] = resized->size;
+				m_perspective = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.01f, 100.f);
+				render.SetViewport(width, height);
+			}
+
+			if (const auto* mousePos = event.GetIf<Event::MouseMoved>())
+			{
+				const auto [x, y] = mousePos->position;
+				puts((std::to_string(x) + "/" + std::to_string(y)).c_str());
+			}
+		}
 
 		float deltaTime = 0.01f;
 		// Update
@@ -275,26 +306,41 @@ void main()
 			const float moveSpeed = 10.0f * deltaTime;
 			const glm::vec3 oldCameraPos = m_camera.position;
 
+			glm::ivec2 curPos = Mouse::GetPosition(window);
+			glm::ivec2 deltaPos = curPos - prevPos;
+			prevPos = curPos;
+
+			auto change = Mouse::GetPosition(window) - lastMousePosition;
+
 			if (Keyboard::IsKeyPressed(Keyboard::Key::W)) m_camera.MoveBy(moveSpeed);
 			if (Keyboard::IsKeyPressed(Keyboard::Key::S)) m_camera.MoveBy(-moveSpeed);
 			if (Keyboard::IsKeyPressed(Keyboard::Key::A)) m_camera.StrafeBy(moveSpeed);
 			if (Keyboard::IsKeyPressed(Keyboard::Key::D)) m_camera.StrafeBy(-moveSpeed);
 
-			glm::ivec2 curPos = Mouse::GetPosition(window);
-			glm::ivec2 deltaPos = curPos - prevPos;
-			prevPos = curPos;
+			if (Mouse::IsButtonPressed(Mouse::Button::Right))
+			{
+				window.SetMouseCursorVisible(false);
+				window.SetMouseCursorGrabbed(true);
+				Mouse::SetPositionCentre(window);
 
-			if (deltaPos.x != 0.0f)  m_camera.RotateLeftRight(deltaPos.x * mouseSensitivity);
-			if (deltaPos.y != 0.0f)  m_camera.RotateUpDown(-deltaPos.y * mouseSensitivity);
+				lastMousePosition = Mouse::GetPosition(window);
+
+				if (change.x != 0.0f)  m_camera.RotateLeftRight(change.x * mouseSensitivity);
+				if (change.y != 0.0f)  m_camera.RotateUpDown(-change.y * mouseSensitivity);
+			}
+			else
+			{
+				window.SetMouseCursorVisible(true);
+				window.SetMouseCursorGrabbed(false);
+			}
+
+
 		}
 
 		// Draw
 		render.BeginFrame();
 
 		{
-			m_perspective = glm::perspective(glm::radians(45.0f), (float)window.GetWidth() / (float)window.GetHeight(), 0.01f, 100.f);
-			render.SetViewport(window.GetWidth(), window.GetHeight());
-
 			{
 				glm::mat4 model = glm::mat4(1.0f);
 
