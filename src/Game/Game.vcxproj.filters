@@ -6,11 +6,53 @@
     <ClCompile Include="GameApp.cpp">
       <Filter>App</Filter>
     </ClCompile>
+    <ClCompile Include="TestApp.cpp">
+      <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="Framebuffer.cpp">
+      <Filter>Temp</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Temp</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Temp</Filter>
+    </ClCompile>
+    <ClCompile Include="Util.cpp">
+      <Filter>Temp</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Temp</Filter>
+    </ClCompile>
+    <ClCompile Include="Ssao.cpp">
+      <Filter>Temp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="GameApp.h">
       <Filter>App</Filter>
+    </ClInclude>
+    <ClInclude Include="TestApp.h">
+      <Filter>App</Filter>
+    </ClInclude>
+    <ClInclude Include="Framebuffer.h">
+      <Filter>Temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Util.h">
+      <Filter>Temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Ssao.h">
+      <Filter>Temp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -20,5 +62,31 @@
     <Filter Include="Framework">
       <UniqueIdentifier>{4f5a0c81-b4c3-422d-bb22-6812ac0e0a94}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Temp">
+      <UniqueIdentifier>{165822fe-6339-4e39-93e5-68bd572e0702}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Temp\shader">
+      <UniqueIdentifier>{84bbf24f-97da-4444-b43e-7cdf2ce82912}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="blur.frag.glsl">
+      <Filter>Temp\shader</Filter>
+    </None>
+    <None Include="blur.vert.glsl">
+      <Filter>Temp\shader</Filter>
+    </None>
+    <None Include="gbuffer.frag.glsl">
+      <Filter>Temp\shader</Filter>
+    </None>
+    <None Include="gbuffer.vert.glsl">
+      <Filter>Temp\shader</Filter>
+    </None>
+    <None Include="main.frag.glsl">
+      <Filter>Temp\shader</Filter>
+    </None>
+    <None Include="main.vert.glsl">
+      <Filter>Temp\shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

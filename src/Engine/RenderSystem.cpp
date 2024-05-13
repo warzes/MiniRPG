@@ -426,8 +426,10 @@ void RenderSystem::initializeExtensions(bool print)
 #if defined(_DEBUG)
 	if (OpenGLExtensions::version >= OPENGL43 && glDebugMessageCallback)
 	{
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback(glDebugCallback, nullptr);
-		glEnable(GL_DEBUG_OUTPUT);
+		GLuint unusedIds = 0;
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &unusedIds, true);
 		OpenGLExtensions::coreDebug = true;
 	}
 #endif

@@ -21,8 +21,6 @@
 extern "C" {
 #endif
 
-
-
 int GLAD_WGL_VERSION_1_0 = 0;
 int GLAD_WGL_ARB_buffer_region = 0;
 int GLAD_WGL_ARB_context_flush_control = 0;
@@ -41,8 +39,6 @@ int GLAD_WGL_ARB_render_texture = 0;
 int GLAD_WGL_ARB_robustness_application_isolation = 0;
 int GLAD_WGL_ARB_robustness_share_group_isolation = 0;
 int GLAD_WGL_EXT_extensions_string = 0;
-
-
 
 PFNWGLBINDTEXIMAGEARBPROC glad_wglBindTexImageARB = NULL;
 PFNWGLCHOOSEPIXELFORMATARBPROC glad_wglChoosePixelFormatARB = NULL;
@@ -64,7 +60,6 @@ PFNWGLRELEASETEXIMAGEARBPROC glad_wglReleaseTexImageARB = NULL;
 PFNWGLRESTOREBUFFERREGIONARBPROC glad_wglRestoreBufferRegionARB = NULL;
 PFNWGLSAVEBUFFERREGIONARBPROC glad_wglSaveBufferRegionARB = NULL;
 PFNWGLSETPBUFFERATTRIBARBPROC glad_wglSetPbufferAttribARB = NULL;
-
 
 static void glad_wgl_load_WGL_ARB_buffer_region(GLADuserptrloadfunc load, void *userptr) {
     if(!GLAD_WGL_ARB_buffer_region) return;

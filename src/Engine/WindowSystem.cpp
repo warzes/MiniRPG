@@ -394,12 +394,20 @@ bool WindowSystem::loadGLContext()
 	}
 
 	// 4.6 forward compatible core profile
+	int contextFlags = WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
+#ifdef _DEBUG
+	contextFlags |= WGL_CONTEXT_DEBUG_BIT_ARB;
+#else
+	if (GLAD_WGL_ARB_create_context_no_error)
+		contextFlags |= WGL_CONTEXT_OPENGL_NO_ERROR_ARB;
+#endif
+
 	const int attribs[] =
 	{
 		WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
 		WGL_CONTEXT_MINOR_VERSION_ARB, 6,
 		WGL_CONTEXT_LAYER_PLANE_ARB, 0, // main plane
-		WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB | WGL_CONTEXT_DEBUG_BIT_ARB,
+		WGL_CONTEXT_FLAGS_ARB, contextFlags,
 		WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 		0
 	};
