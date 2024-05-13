@@ -38,6 +38,15 @@
     <ClCompile Include="RenderSystem_State.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="Keyboard.cpp">
+      <Filter>Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineString.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Mouse.cpp">
+      <Filter>Platform</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -76,6 +85,21 @@
     </ClInclude>
     <ClInclude Include="RenderCamera.h">
       <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Keyboard.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumArray.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineString.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Utf.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Mouse.h">
+      <Filter>Platform</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -22,9 +22,13 @@
 #endif
 
 #include "Engine/Core.h"
+#include "Engine/EngineString.h"
+#include "Engine/Image.h"
 #include "Engine/LogSystem.h"
 #include "Engine/Systems.h"
 
+#include "Engine/Keyboard.h"
+#include "Engine/Mouse.h"
 #include "Engine/WindowSystem.h"
 
 #include "Engine/RenderSystem.h"

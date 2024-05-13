@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
+#include <array>
 #include <span>
 #include <vector>
 #include <unordered_map>

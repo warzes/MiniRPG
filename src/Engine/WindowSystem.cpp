@@ -330,3 +330,8 @@ uint32_t WindowSystem::GetHeight() const
 	return m_frameHeight;
 }
 //-----------------------------------------------------------------------------
+HWND WindowSystem::GetNativeHandle() const
+{
+	return m_hwnd;
+}
+//-----------------------------------------------------------------------------

@@ -34,6 +34,7 @@ public:
 
 	uint32_t GetWidth() const;
 	uint32_t GetHeight() const;
+	HWND GetNativeHandle() const;
 
 private:
 	Systems& m_systems;

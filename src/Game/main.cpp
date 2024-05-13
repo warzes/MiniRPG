@@ -68,7 +68,7 @@ void main()
 		2, 1, 0    // second triangle
 	};
 
-	glEnable(GL_CULL_FACE); // для теста - квад выше против часой стрелки
+	//glEnable(GL_CULL_FACE); // для теста - квад выше против часой стрелки
 
 	m_shader = render.CreateShaderProgram({ vertexShaderText }, { fragmentShaderText });
 	m_uniformProjectionMatrix = render.GetUniform(m_shader, "ProjectionMatrix");
@@ -260,26 +260,32 @@ void main()
 		m_fbo = render.CreateFramebuffer(m_textureColorbuffer, m_rbo);
 	}
 
+	glm::ivec2 prevPos = Mouse::GetPosition(window);
+
 	while (1)
 	{
 		if (window.ShouldQuit()) break;
 		if (window.PeekMessages())
 			continue;
 
+		float deltaTime = 0.01f;
 		// Update
 		{
-	/*		const float mouseSensitivity = 10.0f * deltaTime;
+			const float mouseSensitivity = 10.0f * deltaTime;
 			const float moveSpeed = 10.0f * deltaTime;
 			const glm::vec3 oldCameraPos = m_camera.position;
 
-			if (GetInputSystem().IsKeyDown(Input::KEY_W)) m_camera.MoveBy(moveSpeed);
-			if (GetInputSystem().IsKeyDown(Input::KEY_S)) m_camera.MoveBy(-moveSpeed);
-			if (GetInputSystem().IsKeyDown(Input::KEY_A)) m_camera.StrafeBy(moveSpeed);
-			if (GetInputSystem().IsKeyDown(Input::KEY_D)) m_camera.StrafeBy(-moveSpeed);
+			if (Keyboard::IsKeyPressed(Keyboard::Key::W)) m_camera.MoveBy(moveSpeed);
+			if (Keyboard::IsKeyPressed(Keyboard::Key::S)) m_camera.MoveBy(-moveSpeed);
+			if (Keyboard::IsKeyPressed(Keyboard::Key::A)) m_camera.StrafeBy(moveSpeed);
+			if (Keyboard::IsKeyPressed(Keyboard::Key::D)) m_camera.StrafeBy(-moveSpeed);
 
-			glm::vec2 delta = GetInputSystem().GetMouseDeltaPosition();
-			if (delta.x != 0.0f)  m_camera.RotateLeftRight(delta.x * mouseSensitivity);
-			if (delta.y != 0.0f)  m_camera.RotateUpDown(-delta.y * mouseSensitivity);*/
+			glm::ivec2 curPos = Mouse::GetPosition(window);
+			glm::ivec2 deltaPos = curPos - prevPos;
+			prevPos = curPos;
+
+			if (deltaPos.x != 0.0f)  m_camera.RotateLeftRight(deltaPos.x * mouseSensitivity);
+			if (deltaPos.y != 0.0f)  m_camera.RotateUpDown(-deltaPos.y * mouseSensitivity);
 		}
 
 		// Draw
