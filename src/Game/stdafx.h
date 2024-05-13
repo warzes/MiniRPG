@@ -28,5 +28,6 @@
 #include "Engine/WindowSystem.h"
 
 #include "Engine/RenderSystem.h"
+#include "Engine/RenderCamera.h"
 
 #include "Engine/EngineApp.h"

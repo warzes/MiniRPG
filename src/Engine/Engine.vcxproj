@@ -97,10 +97,13 @@
     <ClCompile Include="EngineApp.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="LogSystem.cpp" />
+    <ClCompile Include="RenderCamera.cpp" />
     <ClCompile Include="RenderCore.cpp" />
     <ClCompile Include="RenderResources.cpp" />
     <ClCompile Include="RenderSystem.cpp" />
+    <ClCompile Include="RenderSystem_Buffer.cpp" />
     <ClCompile Include="RenderSystem_Shader.cpp" />
+    <ClCompile Include="RenderSystem_State.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -109,9 +112,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core.h" />
+    <ClInclude Include="DebugNew.h" />
     <ClInclude Include="EngineApp.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="LogSystem.h" />
+    <ClInclude Include="RenderCamera.h" />
     <ClInclude Include="RenderCore.h" />
     <ClInclude Include="RenderResources.h" />
     <ClInclude Include="RenderSystem.h" />

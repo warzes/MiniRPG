@@ -29,6 +29,15 @@
     <ClCompile Include="RenderSystem_Shader.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="RenderCamera.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem_Buffer.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem_State.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -62,6 +71,12 @@
     <ClInclude Include="Image.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="DebugNew.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderCamera.h">
+      <Filter>Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -75,6 +90,9 @@
     </Filter>
     <Filter Include="Platform">
       <UniqueIdentifier>{531bf4ee-0294-4396-ba8c-ba58b18acaa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{d97133bd-8f8c-4c0f-adde-a5e086c23c8d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
