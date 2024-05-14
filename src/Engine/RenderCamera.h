@@ -1,4 +1,6 @@
-#pragma once
+﻿#pragma once
+
+// TODO: Error: если передать примерно так Teleport({x,y,z}, {0,0,0}) - то ошибка, target будет равен position  и матрица вида не посчитается
 
 class RenderCamera final
 {
@@ -13,9 +15,9 @@ public:
 	glm::vec3 GetNormalizedViewVector() const;
 	glm::mat4 GetViewMatrix() const;
 
-	glm::vec3 GetForwardVector() const; // TODO: ���������
-	glm::vec3 GetRightVector() const; // TODO: ���������
-	glm::vec3 GetUpVector() const; // TODO: ���������
+	glm::vec3 GetForwardVector() const; // TODO: проверить
+	glm::vec3 GetRightVector() const; // TODO: проверить
+	glm::vec3 GetUpVector() const; // TODO: проверить
 
 	glm::vec3 position = glm::vec3(0.0f);
 	glm::vec3 target = glm::vec3(0.0f, 0.0f, 1.0f);

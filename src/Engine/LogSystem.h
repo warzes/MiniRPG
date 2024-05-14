@@ -4,7 +4,7 @@
 
 struct LogCreateInfo final
 {
-	std::string fileName = "../log.txt";
+	std::string fileName = "log.txt";
 };
 
 class LogSystem final

@@ -3,6 +3,7 @@
 #include "Systems.h"
 #include "Image.h"
 #include "RenderResources.h"
+#include "nRenderResources.h"
 
 constexpr int MaxBindingTextures = 16;
 
@@ -16,11 +17,161 @@ class RenderSystem final
 public:
 	RenderSystem(Systems& systems);
 	~RenderSystem();
+
 	bool Create(const RenderSystemCreateInfo& createInfo);
 	void Destroy();
 
 	void BeginFrame();
 	void EndFrame();
+
+	//=============================================================================
+	// NEW
+	//=============================================================================
+
+	//-------------------------------------------------------------------------
+	// Create Resource
+	//-------------------------------------------------------------------------
+	template<typename T>
+	GLBufferRef CreateBuffer(const std::vector<T>& buff, GLenum flags = GL_DYNAMIC_STORAGE_BIT)
+	{
+		GLBufferRef resource = std::make_shared<GLBuffer>();
+		glNamedBufferStorage(*resource, sizeof(typename std::vector<T>::value_type) * buff.size(), buff.data(), flags);
+		return resource;
+	}
+
+	GLVertexArrayRef CreateVertexArray()
+	{
+		return std::make_shared<GLVertexArray>();
+	}
+
+	GLVertexArrayRef CreateVertexArray(const std::vector<AttribFormat>& attribFormats)
+	{
+		GLVertexArrayRef resource = std::make_shared<GLVertexArray>();
+		VertexArraySetAttribFormats(resource, attribFormats);
+		return resource;
+	}
+
+	GLVertexArrayRef CreateVertexArray(GLBufferRef vbo, size_t vertexSize, const std::vector<AttribFormat>& attribFormats)
+	{
+		return CreateVertexArray(vbo, vertexSize, nullptr, attribFormats);
+	}
+
+	GLVertexArrayRef CreateVertexArray(GLBufferRef vbo, size_t vertexSize, GLBufferRef ibo, const std::vector<AttribFormat>& attribFormats)
+	{
+		GLVertexArrayRef vao = CreateVertexArray(attribFormats);
+		if (vbo && *vbo && vertexSize) VertexArraySetVertexBuffer(vao, vbo, vertexSize);
+		if (ibo && *ibo) VertexArraySetIndexBuffer(vao, ibo);
+		return vao;
+	}
+
+	template<typename T>
+	GLVertexArrayRef CreateVertexArray(const std::vector<T>& vertices, const std::vector<uint8_t>& indices, const std::vector<AttribFormat>& attribFormats)
+	{
+		GLBufferRef vbo = CreateBuffer(vertices);
+		GLBufferRef ibo = CreateBuffer(indices);
+		return CreateVertexArray(vbo, sizeof(T), ibo, attribFormats);
+	}
+
+	template<typename T>
+	GLVertexArrayRef CreateVertexArray(const std::vector<T>& vertices, const std::vector<uint16_t>& indices, const std::vector<AttribFormat>& attribFormats)
+	{
+		GLBufferRef vbo = CreateBuffer(vertices);
+		GLBufferRef ibo = CreateBuffer(indices);
+		return CreateVertexArray(vbo, sizeof(T), ibo, attribFormats);
+	}
+	template<typename T>
+	GLVertexArrayRef CreateVertexArray(const std::vector<T>& vertices, const std::vector<uint32_t>& indices, const std::vector<AttribFormat>& attribFormats)
+	{
+		GLBufferRef vbo = CreateBuffer(vertices);
+		GLBufferRef ibo = CreateBuffer(indices);
+		return CreateVertexArray(vbo, sizeof(T), ibo, attribFormats);
+	}
+
+	template<typename T>
+	GLGeometryRef CreateGeometry(const std::vector<T>& vertices, const std::vector<uint8_t>& indices, const std::vector<AttribFormat>& attribFormats)
+	{
+		GLGeometryRef resource = std::make_shared< GLGeometry>();
+		resource->vbo = CreateBuffer(vertices);
+		resource->vertexSize = sizeof(T);
+		resource->ibo = CreateBuffer(indices);
+		resource->indexFormat = IndexFormat::UInt8;
+		resource->vao = CreateVertexArray(resource->vbo, resource->vertexSize, resource->ibo, attribFormats);
+		return resource;
+	}
+
+	template<typename T>
+	GLGeometryRef CreateGeometry(const std::vector<T>& vertices, const std::vector<uint16_t>& indices, const std::vector<AttribFormat>& attribFormats)
+	{
+		GLGeometryRef resource = std::make_shared< GLGeometry>();
+		resource->vbo = CreateBuffer(vertices);
+		resource->vertexSize = sizeof(T);
+		resource->ibo = CreateBuffer(indices);
+		resource->indexFormat = IndexFormat::UInt16;
+		resource->vao = CreateVertexArray(resource->vbo, resource->vertexSize, resource->ibo, attribFormats);
+		return resource;
+	}
+	template<typename T>
+	GLGeometryRef CreateGeometry(const std::vector<T>& vertices, const std::vector<uint32_t>& indices, const std::vector<AttribFormat>& attribFormats)
+	{
+		GLGeometryRef resource = std::make_shared< GLGeometry>();
+		resource->vbo = CreateBuffer(vertices);
+		resource->vertexSize = sizeof(T);
+		resource->ibo = CreateBuffer(indices);
+		resource->indexFormat = IndexFormat::UInt32;
+		resource->vao = CreateVertexArray(resource->vbo, resource->vertexSize, resource->ibo, attribFormats);
+		return resource;
+	}
+
+	//-------------------------------------------------------------------------
+	// Modify Resource
+	//-------------------------------------------------------------------------
+	void VertexArraySetAttribFormats(GLVertexArrayRef vao, const std::vector<AttribFormat>& attribFormats)
+	{
+		assert(vao && *vao);
+		for (auto const& format : attribFormats)
+		{
+			glEnableVertexArrayAttrib(*vao, format.attribIndex);
+			glVertexArrayAttribFormat(*vao, format.attribIndex, format.size, format.type, GL_FALSE, format.relativeOffset);
+			glVertexArrayAttribBinding(*vao, format.attribIndex, 0);
+		}
+
+	}
+	void VertexArraySetVertexBuffer(GLVertexArrayRef vao, GLBufferRef vbo, size_t vertexSize)
+	{
+		assert(vao && *vao);
+		assert(vbo && *vbo);
+		glVertexArrayVertexBuffer(*vao, 0, *vbo, 0, vertexSize);
+	}
+
+	void VertexArraySetIndexBuffer(GLVertexArrayRef vao, GLBufferRef ibo)
+	{
+		assert(vao && *vao);
+		assert(ibo && *ibo);
+		glVertexArrayElementBuffer(*vao, *ibo);
+	}
+
+	//-------------------------------------------------------------------------
+	// Bind Resource
+	//-------------------------------------------------------------------------
+	void Bind(GLVertexArrayRef vao)
+	{
+		glBindVertexArray(*vao);
+	}
+
+	void Bind(GLGeometryRef geom)
+	{
+		glBindVertexArray(*geom->vao);
+	}
+
+private:
+	Systems& m_systems;
+
+
+
+	//=============================================================================
+	// OLD
+	//=============================================================================
+public:
 
 	//-------------------------------------------------------------------------
 	// Config Current Frame Set
@@ -232,9 +383,6 @@ private:
 	} m_cache;
 
 	std::unordered_map<std::string, Texture2DRef> m_cacheFileTextures2D;
-
-private:
-	Systems& m_systems;
 };
 
 RenderSystem& GetRenderSystem();

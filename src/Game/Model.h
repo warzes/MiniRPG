@@ -11,14 +11,6 @@ struct vertex_t
 		: position(position), color(color), normal(normal), texcoord(texcoord) {}
 };
 
-struct attrib_format_t
-{
-	GLuint attrib_index = 0;
-	GLint size = 0;
-	GLenum type = 0;
-	GLuint relative_offset = 0;
-};
-
 template<typename T>
 constexpr std::pair<GLint, GLenum> type_to_size_enum()
 {
@@ -38,40 +30,10 @@ constexpr std::pair<GLint, GLenum> type_to_size_enum()
 }
 
 template<typename T>
-inline attrib_format_t create_attrib_format(GLuint attrib_index, GLuint relative_offset)
+inline AttribFormat create_attrib_format(GLuint attrib_index, GLuint relative_offset)
 {
 	auto const [comp_count, type] = type_to_size_enum<T>();
-	return attrib_format_t{ attrib_index, comp_count, type, relative_offset };
-}
-
-template<typename T>
-inline GLuint create_buffer(std::vector<T> const& buff, GLenum flags = GL_DYNAMIC_STORAGE_BIT)
-{
-	GLuint name = 0;
-	glCreateBuffers(1, &name);
-	glNamedBufferStorage(name, sizeof(typename std::vector<T>::value_type) * buff.size(), buff.data(), flags);
-	return name;
-}
-
-template<typename T>
-std::tuple<GLuint, GLuint, GLuint> create_geometry(std::vector<T> const& vertices, std::vector<uint8_t> const& indices, std::vector<attrib_format_t> const& attrib_formats)
-{
-	GLuint vao = 0;
-	auto vbo = create_buffer(vertices);
-	auto ibo = create_buffer(indices);
-
-	glCreateVertexArrays(1, &vao);
-	glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(T));
-	glVertexArrayElementBuffer(vao, ibo);
-
-	for (auto const& format : attrib_formats)
-	{
-		glEnableVertexArrayAttrib(vao, format.attrib_index);
-		glVertexArrayAttribFormat(vao, format.attrib_index, format.size, format.type, GL_FALSE, format.relative_offset);
-		glVertexArrayAttribBinding(vao, format.attrib_index, 0);
-	}
-
-	return std::make_tuple(vao, vbo, ibo);
+	return AttribFormat{ attrib_index, comp_count, type, relative_offset };
 }
 
 std::vector<glm::vec3> calc_tangents(std::vector<vertex_t> const& vertices, std::vector<uint8_t> const& indices);

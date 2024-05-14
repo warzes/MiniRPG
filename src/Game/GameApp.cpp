@@ -115,7 +115,7 @@ void GameApp::Run()
 
 	glm::ivec2 lastMousePosition = Mouse::GetPosition(window);
 
-	m_camera.Teleport({ 0.0f, 0.0f, -7.0f }, { 0.0f, 0.0f, 1.0f });
+	m_camera.Teleport({ 0.0f, 0.0f, -7.0f });
 
 	//=============================================================================
 	//=============================================================================
@@ -154,7 +154,7 @@ void GameApp::Run()
 	auto const fb_blur = create_framebuffer({ texture_motion_blur });
 
 	/* vertex formatting information */
-	std::vector<attrib_format_t> const vertex_format =
+	std::vector<AttribFormat> const vertex_format =
 	{
 		create_attrib_format<glm::vec3>(0, offsetof(vertex_t, position)),
 		create_attrib_format<glm::vec3>(1, offsetof(vertex_t, color)),
@@ -164,8 +164,9 @@ void GameApp::Run()
 
 	/* geometry buffers */
 	auto const vao_empty = [] { GLuint name = 0; glCreateVertexArrays(1, &name); return name; }();
-	auto const [vao_cube, vbo_cube, ibo_cube] = create_geometry(vertices_cube, indices_cube, vertex_format);
-	auto const [vao_quad, vbo_quad, ibo_quad] = create_geometry(vertices_quad, indices_quad, vertex_format);
+
+	GLGeometryRef cubeGeom = render.CreateGeometry(vertices_cube, indices_cube, vertex_format);
+	GLGeometryRef quadGeom = render.CreateGeometry(vertices_quad, indices_quad, vertex_format);
 
 	/* shaders */
 	auto const [pr_main, vert_shader, frag_shader] = create_program_from_sources(mainVertSource, mainFragSource);
@@ -332,8 +333,8 @@ void GameApp::Run()
 			{
 				switch (object.shape)
 				{
-				case shape_t::cube: glBindVertexArray(vao_cube); break;
-				case shape_t::quad: glBindVertexArray(vao_quad); break;
+				case shape_t::cube: render.Bind(cubeGeom); break;
+				case shape_t::quad: render.Bind(quadGeom); break;
 				}
 
 				auto const curr_mvp_inv = m_perspective * m_camera.GetViewMatrix() * object.model;
@@ -414,14 +415,9 @@ void GameApp::Run()
 		render.EndFrame();
 	}
 
-	delete_items(glDeleteBuffers,
-		{
-		vbo_cube,
-		ibo_cube,
+	cubeGeom.reset();
+	quadGeom.reset();
 
-		vbo_quad,
-		ibo_quad,
-		});
 	delete_items(glDeleteTextures,
 		{
 		texture_cube_diffuse,
@@ -448,7 +444,6 @@ void GameApp::Run()
 		});
 
 	delete_items(glDeleteProgramPipelines, { pr_main, pr_gbuffer });
-	delete_items(glDeleteVertexArrays, { vao_cube, vao_empty });
 	delete_items(glDeleteFramebuffers, { fb_gbuffer, fb_finalcolor, fb_blur });
 
 	render.Destroy();

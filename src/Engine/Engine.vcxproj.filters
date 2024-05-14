@@ -29,9 +29,6 @@
     <ClCompile Include="RenderSystem_Shader.cpp">
       <Filter>Render</Filter>
     </ClCompile>
-    <ClCompile Include="RenderCamera.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
     <ClCompile Include="RenderSystem_Buffer.cpp">
       <Filter>Render</Filter>
     </ClCompile>
@@ -58,6 +55,15 @@
     </ClCompile>
     <ClCompile Include="Sleep.cpp">
       <Filter>Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderCamera.cpp">
+      <Filter>RenderNew</Filter>
+    </ClCompile>
+    <ClCompile Include="nRenderResources.cpp">
+      <Filter>RenderNew</Filter>
+    </ClCompile>
+    <ClCompile Include="nRenderCore.cpp">
+      <Filter>RenderNew</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -94,9 +100,6 @@
     </ClInclude>
     <ClInclude Include="DebugNew.h">
       <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderCamera.h">
-      <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="Keyboard.h">
       <Filter>Platform</Filter>
@@ -137,6 +140,15 @@
     <ClInclude Include="Sleep.h">
       <Filter>Platform</Filter>
     </ClInclude>
+    <ClInclude Include="RenderCamera.h">
+      <Filter>RenderNew</Filter>
+    </ClInclude>
+    <ClInclude Include="nRenderResources.h">
+      <Filter>RenderNew</Filter>
+    </ClInclude>
+    <ClInclude Include="nRenderCore.h">
+      <Filter>RenderNew</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -156,6 +168,9 @@
     </Filter>
     <Filter Include="Platform\priv">
       <UniqueIdentifier>{c708819e-d80c-48ae-b487-b63f7b363cea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RenderNew">
+      <UniqueIdentifier>{2edf50ab-2659-4213-b210-7dcc70dae74b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

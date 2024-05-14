@@ -131,6 +131,19 @@ void RenderSystem::SetClearColor(const glm::vec3& color)
 	glClearColor(color.x, color.y, color.z, 1.0f);
 }
 //-----------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+//=============================================================================
+// OLD
+//=============================================================================
 void RenderSystem::ClearFrame()
 {
 	glClear(m_cache.CurrentClearMask);
