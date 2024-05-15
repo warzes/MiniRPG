@@ -3,16 +3,16 @@
 #include "RenderCore.h"
 #include "nRenderCore.h"
 
-template<typename T>
-class GLObject
+class GLProgramObject final
 {
 public:
-	GLObject() : m_handle(createHandle()) {}
-	GLObject(const GLObject&) = delete;
-	GLObject(GLObject&& other) noexcept : m_handle{ other.m_handle } { other.m_handle = 0; }
-	~GLObject() { destroyHandle(m_handle); }
-	GLObject& operator=(const GLObject&) = delete;
-	GLObject& operator=(GLObject&& other) noexcept
+	GLProgramObject() = delete;
+	GLProgramObject(GLenum type, std::string_view source) { createHandle(type, source); }
+	GLProgramObject(const GLProgramObject&) = delete;
+	GLProgramObject(GLProgramObject&& other) noexcept : m_handle{ other.m_handle } { other.m_handle = 0; }
+	~GLProgramObject() { destroyHandle(); }
+	GLProgramObject& operator=(const GLProgramObject&) = delete;
+	GLProgramObject& operator=(GLProgramObject&& other) noexcept
 	{
 		destroyHandle();
 		m_handle = other.m_handle;
@@ -25,54 +25,135 @@ public:
 	operator bool() const noexcept { return m_handle != 0; }
 
 private:
-	static GLuint createHandle()
+	void createHandle(GLenum type, std::string_view source);
+	void destroyHandle();
+	void validate();
+
+	GLuint m_handle = 0;
+};
+using GLProgramObjectRef = std::shared_ptr<GLProgramObject>;
+
+class GLProgramPipeline final
+{
+	friend class RenderSystem;
+public:
+	GLProgramPipeline() { createHandle(); }
+	GLProgramPipeline(const GLProgramPipeline&) = delete;
+	GLProgramPipeline(GLProgramPipeline&& other) noexcept : m_handle{ other.m_handle } { other.m_handle = 0; }
+	~GLProgramPipeline() { destroyHandle(); }
+	GLProgramPipeline& operator=(const GLProgramPipeline&) = delete;
+	GLProgramPipeline& operator=(GLProgramPipeline&& other) noexcept
 	{
-		GLuint handle;
-		T::Create(1, &handle);
-		return handle;
+		destroyHandle();
+		m_handle = other.m_handle;
+		other.m_handle = 0;
+
+		return *this;
+	};
+
+	operator GLuint() const noexcept { return m_handle; }
+	operator bool() const noexcept { return m_handle != 0; }
+
+	GLProgramObjectRef GetVertexShader() { return m_vertexShader; }
+	GLProgramObjectRef GetFragmentShader() { return m_fragmentShader; }
+
+private:
+	void createHandle()
+	{
+		glCreateProgramPipelines(1, &m_handle);
+		assert(m_handle);
 	}
-	static void destroyHandle(GLuint& handle)
+	void destroyHandle()
 	{
-		if (handle != 0)
-			T::Destroy(1, &handle);
-		handle = 0;
+		if (m_handle != 0)
+			glDeleteProgramPipelines(1, &m_handle);
+		m_handle = 0;
+
+		m_vertexShader.reset();
+		m_fragmentShader.reset();
+	}
+
+	GLuint m_handle = 0;
+	GLProgramObjectRef m_vertexShader = nullptr;
+	GLProgramObjectRef m_fragmentShader = nullptr;
+
+};
+using GLProgramPipelineRef = std::shared_ptr<GLProgramPipeline>;
+
+
+class GLBuffer final
+{
+public:
+	GLBuffer() { createHandle(); }
+	GLBuffer(const GLBuffer&) = delete;
+	GLBuffer(GLBuffer&& other) noexcept : m_handle{ other.m_handle } { other.m_handle = 0; }
+	~GLBuffer() { destroyHandle(); }
+	GLBuffer& operator=(const GLBuffer&) = delete;
+	GLBuffer& operator=(GLBuffer&& other) noexcept
+	{
+		destroyHandle();
+		m_handle = other.m_handle;
+		other.m_handle = 0;
+
+		return *this;
+	};
+
+	operator GLuint() const noexcept { return m_handle; }
+	operator bool() const noexcept { return m_handle != 0; }
+
+private:
+	void createHandle()
+	{
+		glCreateBuffers(1, &m_handle);
+		assert(m_handle);
+	}
+	void destroyHandle()
+	{
+		if (m_handle != 0)
+			glDeleteBuffers(1, &m_handle);
+		m_handle = 0;
 	}
 	GLuint m_handle = 0;
 };
-
-class GLBufferHelper
-{
-public:
-	static void Create(GLsizei count, GLuint* handles)
-	{
-		glCreateBuffers(count, handles);
-	}
-	static void Destroy(GLsizei count, GLuint* handles)
-	{
-		glDeleteBuffers(count, handles);
-	}
-};
-
-using GLBuffer = GLObject<GLBufferHelper>;
 using GLBufferRef = std::shared_ptr<GLBuffer>;
 
-class GLVertexArrayHelper
+class GLVertexArray final
 {
 public:
-	static void Create(GLsizei count, GLuint* handles)
+	GLVertexArray() { createHandle(); }
+	GLVertexArray(const GLVertexArray&) = delete;
+	GLVertexArray(GLVertexArray&& other) noexcept : m_handle{ other.m_handle } { other.m_handle = 0; }
+	~GLVertexArray() { destroyHandle(); }
+	GLVertexArray& operator=(const GLVertexArray&) = delete;
+	GLVertexArray& operator=(GLVertexArray&& other) noexcept
 	{
-		glCreateVertexArrays(count, handles);
-	}
-	static void Destroy(GLsizei count, GLuint* handles)
-	{
-		glDeleteVertexArrays(count, handles);
-	}
-};
+		destroyHandle();
+		m_handle = other.m_handle;
+		other.m_handle = 0;
 
-using GLVertexArray = GLObject<GLVertexArrayHelper>;
+		return *this;
+	};
+
+	operator GLuint() const noexcept { return m_handle; }
+	operator bool() const noexcept { return m_handle != 0; }
+
+private:
+	void createHandle()
+	{
+		glCreateVertexArrays(1, &m_handle);
+		assert(m_handle);
+	}
+	void destroyHandle()
+	{
+		if (m_handle != 0)
+			glDeleteVertexArrays(1, &m_handle);
+		m_handle = 0;
+	}
+	GLuint m_handle = 0;
+};
 using GLVertexArrayRef = std::shared_ptr<GLVertexArray>;
 
-class GLGeometry
+class GLGeometry final
 {
 public:
 	GLBufferRef vbo = nullptr;

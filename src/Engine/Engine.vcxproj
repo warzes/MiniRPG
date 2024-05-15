@@ -146,8 +146,12 @@
     <ClInclude Include="Systems.h" />
     <ClInclude Include="TemporaryWindow.h" />
     <ClInclude Include="Utf.h" />
+    <ClInclude Include="Utils.h" />
     <ClInclude Include="WindowsInclude.h" />
     <ClInclude Include="WindowSystem.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RenderSystem.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

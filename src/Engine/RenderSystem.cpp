@@ -2,6 +2,9 @@
 #include "RenderSystem.h"
 #include "WindowSystem.h"
 #include "LogSystem.h"
+#include "Utils.h"
+//-----------------------------------------------------------------------------
+// TODO: добавить проверки ошибок ресурсов. сейчас только ассеты
 //-----------------------------------------------------------------------------
 // Use discrete GPU by default.
 #if PLATFORM_DESKTOP
@@ -131,12 +134,115 @@ void RenderSystem::SetClearColor(const glm::vec3& color)
 	glClearColor(color.x, color.y, color.z, 1.0f);
 }
 //-----------------------------------------------------------------------------
+GLProgramObjectRef RenderSystem::CreateProgramObject(GLenum type, std::string_view source)
+{
+	return std::make_shared<GLProgramObject>(type, source);
+}
+//-----------------------------------------------------------------------------
+GLProgramPipelineRef RenderSystem::CreateProgramPipeline()
+{
+	return std::make_shared<GLProgramPipeline>();
+}
+//-----------------------------------------------------------------------------
+GLProgramPipelineRef RenderSystem::CreateProgramPipeline(GLProgramObjectRef vertexShader, GLProgramObjectRef fragmentShader)
+{
+	GLProgramPipelineRef ret = CreateProgramPipeline();
+	ProgramPipelineSetProgramObjects(ret, vertexShader, fragmentShader);
+	return ret;
+}
+//-----------------------------------------------------------------------------
+GLProgramPipelineRef RenderSystem::CreateProgramPipelineFromSources(std::string_view vertSource, std::string_view fragSource)
+{
+	GLProgramObjectRef vertexShader = CreateProgramObject(GL_VERTEX_SHADER, vertSource);
+	GLProgramObjectRef fragmentShader = CreateProgramObject(GL_FRAGMENT_SHADER, fragSource);
+	return CreateProgramPipeline(vertexShader, fragmentShader);
+}
+//-----------------------------------------------------------------------------
+GLProgramPipelineRef RenderSystem::CreateProgramPipelineFromFiles(std::string_view vertFilepath, std::string_view fragFilepath)
+{
+	const auto vertSource = ReadTextFile(vertFilepath);
+	const auto fragSource = ReadTextFile(fragFilepath);
+	return CreateProgramPipelineFromSources(vertSource, fragSource);
+}
+//-----------------------------------------------------------------------------
+GLVertexArrayRef RenderSystem::CreateVertexArray()
+{
+	return std::make_shared<GLVertexArray>();
+}
+//-----------------------------------------------------------------------------
+GLVertexArrayRef RenderSystem::CreateVertexArray(const std::vector<AttribFormat>& attribFormats)
+{
+	GLVertexArrayRef resource = std::make_shared<GLVertexArray>();
+	VertexArraySetAttribFormats(resource, attribFormats);
+	return resource;
+}
+//-----------------------------------------------------------------------------
+GLVertexArrayRef RenderSystem::CreateVertexArray(GLBufferRef vbo, size_t vertexSize, const std::vector<AttribFormat>& attribFormats)
+{
+	return CreateVertexArray(vbo, vertexSize, nullptr, attribFormats);
+}
+//-----------------------------------------------------------------------------
+GLVertexArrayRef RenderSystem::CreateVertexArray(GLBufferRef vbo, size_t vertexSize, GLBufferRef ibo, const std::vector<AttribFormat>& attribFormats)
+{
+	GLVertexArrayRef vao = CreateVertexArray(attribFormats);
+	if (vbo && *vbo && vertexSize) VertexArraySetVertexBuffer(vao, vbo, vertexSize);
+	if (ibo && *ibo) VertexArraySetIndexBuffer(vao, ibo);
+	return vao;
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::ProgramPipelineSetProgramObjects(GLProgramPipelineRef pipeline, GLProgramObjectRef vertexShader, GLProgramObjectRef fragmentShader)
+{
+	assert(pipeline && *pipeline);
+	assert(vertexShader && *vertexShader);
+	assert(fragmentShader && *fragmentShader);
 
+	glUseProgramStages(*pipeline, GL_VERTEX_SHADER_BIT, *vertexShader);
+	glUseProgramStages(*pipeline, GL_FRAGMENT_SHADER_BIT, *fragmentShader);
 
-
-
-
-
+	pipeline->m_vertexShader = vertexShader;
+	pipeline->m_fragmentShader = fragmentShader;
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::VertexArraySetAttribFormats(GLVertexArrayRef vao, const std::vector<AttribFormat>& attribFormats)
+{
+	assert(vao && *vao);
+	for (auto const& format : attribFormats)
+	{
+		glEnableVertexArrayAttrib(*vao, format.attribIndex);
+		glVertexArrayAttribFormat(*vao, format.attribIndex, format.size, format.type, GL_FALSE, format.relativeOffset);
+		glVertexArrayAttribBinding(*vao, format.attribIndex, 0);
+	}
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::VertexArraySetVertexBuffer(GLVertexArrayRef vao, GLBufferRef vbo, size_t vertexSize)
+{
+	assert(vao && *vao);
+	assert(vbo && *vbo);
+	glVertexArrayVertexBuffer(*vao, 0, *vbo, 0, vertexSize);
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::VertexArraySetIndexBuffer(GLVertexArrayRef vao, GLBufferRef ibo)
+{
+	assert(vao && *vao);
+	assert(ibo && *ibo);
+	glVertexArrayElementBuffer(*vao, *ibo);
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::Bind(GLProgramPipelineRef pipeline)
+{
+	glBindProgramPipeline(*pipeline);
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::Bind(GLVertexArrayRef vao)
+{
+	glBindVertexArray(*vao);
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::Bind(GLGeometryRef geom)
+{
+	glBindVertexArray(*geom->vao);
+}
+//-----------------------------------------------------------------------------
 
 
 

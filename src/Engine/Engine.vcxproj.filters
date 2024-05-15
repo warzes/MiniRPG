@@ -149,6 +149,9 @@
     <ClInclude Include="nRenderCore.h">
       <Filter>RenderNew</Filter>
     </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -172,5 +175,8 @@
     <Filter Include="RenderNew">
       <UniqueIdentifier>{2edf50ab-2659-4213-b210-7dcc70dae74b}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RenderSystem.inl" />
   </ItemGroup>
 </Project>

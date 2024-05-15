@@ -17,7 +17,6 @@ inline void delete_items(glDeleterFunc deleter, std::initializer_list<GLuint> it
 	}
 }
 
-
 enum class shape_t
 {
 	cube = 0,
@@ -169,9 +168,9 @@ void GameApp::Run()
 	GLGeometryRef quadGeom = render.CreateGeometry(vertices_quad, indices_quad, vertex_format);
 
 	/* shaders */
-	auto const [pr_main, vert_shader, frag_shader] = create_program_from_sources(mainVertSource, mainFragSource);
-	auto const [pr_gbuffer, vert_shader_g, frag_shader_g] = create_program_from_sources(gbufferVertSource, gbufferFragSource);
-	auto const [pr_blur, vert_shader_blur, frag_shader_blur] = create_program_from_sources(blurVertSource, blurFragSource);
+	GLProgramPipelineRef ppMain = render.CreateProgramPipelineFromSources(mainVertSource, mainFragSource);
+	GLProgramPipelineRef ppGBuffer = render.CreateProgramPipelineFromSources(gbufferVertSource, gbufferFragSource);
+	GLProgramPipelineRef ppBlur = render.CreateProgramPipelineFromSources(blurVertSource, blurFragSource);
 
 	/* uniforms */
 	constexpr auto uniform_projection = 0;
@@ -191,7 +190,7 @@ void GameApp::Run()
 	constexpr auto uniform_blur_except = 5;
 	constexpr auto uniform_emissive_strength = 0;
 
-	set_uniform(vert_shader_g, uniform_projection, m_perspective);
+	render.SetUniform(ppGBuffer->GetVertexShader(), uniform_projection, m_perspective);
 
 	std::vector<scene_object_t> objects = {
 		scene_object_t(shape_t::cube),
@@ -301,7 +300,7 @@ void GameApp::Run()
 
 		objects[5].model = glm::translate(glm::vec3(0.0f, -3.0f, 0.0f)) * glm::scale(glm::vec3(10.0f, 1.0f, 10.0f));
 
-		set_uniform(vert_shader_g, uniform_view, m_camera.GetViewMatrix());
+		render.SetUniform(ppGBuffer->GetVertexShader(), uniform_view, m_camera.GetViewMatrix());
 
 		// Draw
 		render.BeginFrame();
@@ -327,7 +326,7 @@ void GameApp::Run()
 			glBindTextureUnit(2, texture_cube_normal);
 			glBindTextureUnit(3, texture_cube_emissive);
 
-			glBindProgramPipeline(pr_gbuffer);
+			render.Bind(ppGBuffer);
 
 			for (auto& object : objects)
 			{
@@ -339,11 +338,11 @@ void GameApp::Run()
 
 				auto const curr_mvp_inv = m_perspective * m_camera.GetViewMatrix() * object.model;
 
-				set_uniform(vert_shader_g, uniform_modl, object.model);
-				set_uniform(vert_shader_g, uniform_mvp, curr_mvp_inv);
-				set_uniform(vert_shader_g, uniform_mvp_inverse, object.mvp_inv_prev);
-				set_uniform(vert_shader_g, uniform_blur_except, object.except);
-				set_uniform(frag_shader_g, uniform_emissive_strength, object.emissive_strength);
+				render.SetUniform(ppGBuffer->GetVertexShader(), uniform_modl, object.model);
+				render.SetUniform(ppGBuffer->GetVertexShader(), uniform_mvp, curr_mvp_inv);
+				render.SetUniform(ppGBuffer->GetVertexShader(), uniform_mvp_inverse, object.mvp_inv_prev);
+				render.SetUniform(ppGBuffer->GetVertexShader(), uniform_blur_except, object.except);
+				render.SetUniform(ppGBuffer->GetFragmentShader(), uniform_emissive_strength, object.emissive_strength);
 
 				object.mvp_inv_prev = curr_mvp_inv;
 
@@ -370,16 +369,16 @@ void GameApp::Run()
 			glBindTextureUnit(4, texture_gbuffer_emissive);
 			glBindTextureUnit(5, texture_skybox);
 
-			glBindProgramPipeline(pr_main);
+			render.Bind(ppMain);
 			glBindVertexArray(vao_empty);
 
-			set_uniform(frag_shader, uniform_cam_pos, m_camera.position);
-			set_uniform(frag_shader, uniform_light_col, glm::vec3(1.0));
-			set_uniform(frag_shader, uniform_light_pos, light_pos);
-			set_uniform(vert_shader, uniform_cam_dir, glm::inverse(glm::mat3(m_camera.GetViewMatrix())));
-			set_uniform(vert_shader, uniform_fov, fov);
-			set_uniform(vert_shader, uniform_aspect, float(viewport_width) / float(viewport_height));
-			set_uniform(vert_shader, uniform_uvs_diff, glm::vec2(
+			render.SetUniform(ppMain->GetFragmentShader(), uniform_cam_pos, m_camera.position);
+			render.SetUniform(ppMain->GetFragmentShader(), uniform_light_col, glm::vec3(1.0));
+			render.SetUniform(ppMain->GetFragmentShader(), uniform_light_pos, light_pos);
+			render.SetUniform(ppMain->GetVertexShader(), uniform_cam_dir, glm::inverse(glm::mat3(m_camera.GetViewMatrix())));
+			render.SetUniform(ppMain->GetVertexShader(), uniform_fov, fov);
+			render.SetUniform(ppMain->GetVertexShader(), uniform_aspect, float(viewport_width) / float(viewport_height));
+			render.SetUniform(ppMain->GetVertexShader(), uniform_uvs_diff, glm::vec2(
 				float(viewport_width) / float(screen_width),
 				float(viewport_height) / float(screen_height)
 			));
@@ -395,11 +394,11 @@ void GameApp::Run()
 			glBindTextureUnit(0, texture_gbuffer_color);
 			glBindTextureUnit(1, texture_gbuffer_velocity);
 
-			glBindProgramPipeline(pr_blur);
+			render.Bind(ppBlur);
 			glBindVertexArray(vao_empty);
 
-			set_uniform(frag_shader_blur, uniform_blur_bias, 0.03f/*float(fps_sum) / float(60)*/);
-			set_uniform(vert_shader_blur, uniform_uvs_diff, glm::vec2(
+			render.SetUniform(ppBlur->GetFragmentShader(), uniform_blur_bias, 0.03f/*float(fps_sum) / float(60)*/);
+			render.SetUniform(ppBlur->GetVertexShader(), uniform_uvs_diff, glm::vec2(
 				float(viewport_width) / float(screen_width),
 				float(viewport_height) / float(screen_height)
 			));
@@ -417,6 +416,9 @@ void GameApp::Run()
 
 	cubeGeom.reset();
 	quadGeom.reset();
+	ppMain.reset();
+	ppGBuffer.reset();
+	ppBlur.reset();
 
 	delete_items(glDeleteTextures,
 		{
@@ -435,15 +437,6 @@ void GameApp::Run()
 		texture_motion_blur,
 		texture_motion_blur_mask
 		});
-	delete_items(glDeleteProgram, {
-		vert_shader,
-		frag_shader,
-
-		vert_shader_g,
-		frag_shader_g,
-		});
-
-	delete_items(glDeleteProgramPipelines, { pr_main, pr_gbuffer });
 	delete_items(glDeleteFramebuffers, { fb_gbuffer, fb_finalcolor, fb_blur });
 
 	render.Destroy();

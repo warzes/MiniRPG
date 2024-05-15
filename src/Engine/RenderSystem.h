@@ -31,137 +31,55 @@ public:
 	//-------------------------------------------------------------------------
 	// Create Resource
 	//-------------------------------------------------------------------------
-	template<typename T>
-	GLBufferRef CreateBuffer(const std::vector<T>& buff, GLenum flags = GL_DYNAMIC_STORAGE_BIT)
-	{
-		GLBufferRef resource = std::make_shared<GLBuffer>();
-		glNamedBufferStorage(*resource, sizeof(typename std::vector<T>::value_type) * buff.size(), buff.data(), flags);
-		return resource;
-	}
 
-	GLVertexArrayRef CreateVertexArray()
-	{
-		return std::make_shared<GLVertexArray>();
-	}
-
-	GLVertexArrayRef CreateVertexArray(const std::vector<AttribFormat>& attribFormats)
-	{
-		GLVertexArrayRef resource = std::make_shared<GLVertexArray>();
-		VertexArraySetAttribFormats(resource, attribFormats);
-		return resource;
-	}
-
-	GLVertexArrayRef CreateVertexArray(GLBufferRef vbo, size_t vertexSize, const std::vector<AttribFormat>& attribFormats)
-	{
-		return CreateVertexArray(vbo, vertexSize, nullptr, attribFormats);
-	}
-
-	GLVertexArrayRef CreateVertexArray(GLBufferRef vbo, size_t vertexSize, GLBufferRef ibo, const std::vector<AttribFormat>& attribFormats)
-	{
-		GLVertexArrayRef vao = CreateVertexArray(attribFormats);
-		if (vbo && *vbo && vertexSize) VertexArraySetVertexBuffer(vao, vbo, vertexSize);
-		if (ibo && *ibo) VertexArraySetIndexBuffer(vao, ibo);
-		return vao;
-	}
+	GLProgramObjectRef CreateProgramObject(GLenum type, std::string_view source);
+	GLProgramPipelineRef CreateProgramPipeline();
+	GLProgramPipelineRef CreateProgramPipeline(GLProgramObjectRef vertexShader, GLProgramObjectRef fragmentShader);
+	GLProgramPipelineRef CreateProgramPipelineFromSources(std::string_view vertSource, std::string_view fragSource);
+	GLProgramPipelineRef CreateProgramPipelineFromFiles(std::string_view vertFilepath, std::string_view fragFilepath);
 
 	template<typename T>
-	GLVertexArrayRef CreateVertexArray(const std::vector<T>& vertices, const std::vector<uint8_t>& indices, const std::vector<AttribFormat>& attribFormats)
-	{
-		GLBufferRef vbo = CreateBuffer(vertices);
-		GLBufferRef ibo = CreateBuffer(indices);
-		return CreateVertexArray(vbo, sizeof(T), ibo, attribFormats);
-	}
+	GLBufferRef CreateBuffer(const std::vector<T>& buff, GLenum flags = GL_DYNAMIC_STORAGE_BIT);
+
+	GLVertexArrayRef CreateVertexArray();
+	GLVertexArrayRef CreateVertexArray(const std::vector<AttribFormat>& attribFormats);
+	GLVertexArrayRef CreateVertexArray(GLBufferRef vbo, size_t vertexSize, const std::vector<AttribFormat>& attribFormats);
+	GLVertexArrayRef CreateVertexArray(GLBufferRef vbo, size_t vertexSize, GLBufferRef ibo, const std::vector<AttribFormat>& attribFormats);
+	template<typename T>
+	GLVertexArrayRef CreateVertexArray(const std::vector<T>& vertices, const std::vector<uint8_t>& indices, const std::vector<AttribFormat>& attribFormats);
+	template<typename T>
+	GLVertexArrayRef CreateVertexArray(const std::vector<T>& vertices, const std::vector<uint16_t>& indices, const std::vector<AttribFormat>& attribFormats);
+	template<typename T>
+	GLVertexArrayRef CreateVertexArray(const std::vector<T>& vertices, const std::vector<uint32_t>& indices, const std::vector<AttribFormat>& attribFormats);
 
 	template<typename T>
-	GLVertexArrayRef CreateVertexArray(const std::vector<T>& vertices, const std::vector<uint16_t>& indices, const std::vector<AttribFormat>& attribFormats)
-	{
-		GLBufferRef vbo = CreateBuffer(vertices);
-		GLBufferRef ibo = CreateBuffer(indices);
-		return CreateVertexArray(vbo, sizeof(T), ibo, attribFormats);
-	}
+	GLGeometryRef CreateGeometry(const std::vector<T>& vertices, const std::vector<uint8_t>& indices, const std::vector<AttribFormat>& attribFormats);
 	template<typename T>
-	GLVertexArrayRef CreateVertexArray(const std::vector<T>& vertices, const std::vector<uint32_t>& indices, const std::vector<AttribFormat>& attribFormats)
-	{
-		GLBufferRef vbo = CreateBuffer(vertices);
-		GLBufferRef ibo = CreateBuffer(indices);
-		return CreateVertexArray(vbo, sizeof(T), ibo, attribFormats);
-	}
-
+	GLGeometryRef CreateGeometry(const std::vector<T>& vertices, const std::vector<uint16_t>& indices, const std::vector<AttribFormat>& attribFormats);
 	template<typename T>
-	GLGeometryRef CreateGeometry(const std::vector<T>& vertices, const std::vector<uint8_t>& indices, const std::vector<AttribFormat>& attribFormats)
-	{
-		GLGeometryRef resource = std::make_shared< GLGeometry>();
-		resource->vbo = CreateBuffer(vertices);
-		resource->vertexSize = sizeof(T);
-		resource->ibo = CreateBuffer(indices);
-		resource->indexFormat = IndexFormat::UInt8;
-		resource->vao = CreateVertexArray(resource->vbo, resource->vertexSize, resource->ibo, attribFormats);
-		return resource;
-	}
-
-	template<typename T>
-	GLGeometryRef CreateGeometry(const std::vector<T>& vertices, const std::vector<uint16_t>& indices, const std::vector<AttribFormat>& attribFormats)
-	{
-		GLGeometryRef resource = std::make_shared< GLGeometry>();
-		resource->vbo = CreateBuffer(vertices);
-		resource->vertexSize = sizeof(T);
-		resource->ibo = CreateBuffer(indices);
-		resource->indexFormat = IndexFormat::UInt16;
-		resource->vao = CreateVertexArray(resource->vbo, resource->vertexSize, resource->ibo, attribFormats);
-		return resource;
-	}
-	template<typename T>
-	GLGeometryRef CreateGeometry(const std::vector<T>& vertices, const std::vector<uint32_t>& indices, const std::vector<AttribFormat>& attribFormats)
-	{
-		GLGeometryRef resource = std::make_shared< GLGeometry>();
-		resource->vbo = CreateBuffer(vertices);
-		resource->vertexSize = sizeof(T);
-		resource->ibo = CreateBuffer(indices);
-		resource->indexFormat = IndexFormat::UInt32;
-		resource->vao = CreateVertexArray(resource->vbo, resource->vertexSize, resource->ibo, attribFormats);
-		return resource;
-	}
+	GLGeometryRef CreateGeometry(const std::vector<T>& vertices, const std::vector<uint32_t>& indices, const std::vector<AttribFormat>& attribFormats);
 
 	//-------------------------------------------------------------------------
 	// Modify Resource
 	//-------------------------------------------------------------------------
-	void VertexArraySetAttribFormats(GLVertexArrayRef vao, const std::vector<AttribFormat>& attribFormats)
-	{
-		assert(vao && *vao);
-		for (auto const& format : attribFormats)
-		{
-			glEnableVertexArrayAttrib(*vao, format.attribIndex);
-			glVertexArrayAttribFormat(*vao, format.attribIndex, format.size, format.type, GL_FALSE, format.relativeOffset);
-			glVertexArrayAttribBinding(*vao, format.attribIndex, 0);
-		}
+	template <typename T>
+	void SetUniform(GLProgramObjectRef shader, GLint location, T const& value);
 
-	}
-	void VertexArraySetVertexBuffer(GLVertexArrayRef vao, GLBufferRef vbo, size_t vertexSize)
-	{
-		assert(vao && *vao);
-		assert(vbo && *vbo);
-		glVertexArrayVertexBuffer(*vao, 0, *vbo, 0, vertexSize);
-	}
+	void ProgramPipelineSetProgramObjects(GLProgramPipelineRef pipeline, GLProgramObjectRef vertexShader, GLProgramObjectRef fragmentShader);
 
-	void VertexArraySetIndexBuffer(GLVertexArrayRef vao, GLBufferRef ibo)
-	{
-		assert(vao && *vao);
-		assert(ibo && *ibo);
-		glVertexArrayElementBuffer(*vao, *ibo);
-	}
+	void VertexArraySetAttribFormats(GLVertexArrayRef vao, const std::vector<AttribFormat>& attribFormats);
+	void VertexArraySetVertexBuffer(GLVertexArrayRef vao, GLBufferRef vbo, size_t vertexSize);
+	void VertexArraySetIndexBuffer(GLVertexArrayRef vao, GLBufferRef ibo);
+
+
+
 
 	//-------------------------------------------------------------------------
 	// Bind Resource
 	//-------------------------------------------------------------------------
-	void Bind(GLVertexArrayRef vao)
-	{
-		glBindVertexArray(*vao);
-	}
-
-	void Bind(GLGeometryRef geom)
-	{
-		glBindVertexArray(*geom->vao);
-	}
+	void Bind(GLProgramPipelineRef pipeline);
+	void Bind(GLVertexArrayRef vao);
+	void Bind(GLGeometryRef geom);
 
 private:
 	Systems& m_systems;
@@ -386,3 +304,5 @@ private:
 };
 
 RenderSystem& GetRenderSystem();
+
+#include "RenderSystem.inl"

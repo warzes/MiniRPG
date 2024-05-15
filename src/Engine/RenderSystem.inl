@@ -1,0 +1,88 @@
+template<typename T>
+inline GLBufferRef RenderSystem::CreateBuffer(const std::vector<T>& buff, GLenum flags)
+{
+	GLBufferRef resource = std::make_shared<GLBuffer>();
+	glNamedBufferStorage(*resource, sizeof(typename std::vector<T>::value_type) * buff.size(), buff.data(), flags);
+	return resource;
+}
+
+template<typename T>
+inline GLVertexArrayRef RenderSystem::CreateVertexArray(const std::vector<T>& vertices, const std::vector<uint8_t>& indices, const std::vector<AttribFormat>& attribFormats)
+{
+	GLBufferRef vbo = CreateBuffer(vertices);
+	GLBufferRef ibo = CreateBuffer(indices);
+	return CreateVertexArray(vbo, sizeof(T), ibo, attribFormats);
+}
+
+template<typename T>
+inline GLVertexArrayRef RenderSystem::CreateVertexArray(const std::vector<T>& vertices, const std::vector<uint16_t>& indices, const std::vector<AttribFormat>& attribFormats)
+{
+	GLBufferRef vbo = CreateBuffer(vertices);
+	GLBufferRef ibo = CreateBuffer(indices);
+	return CreateVertexArray(vbo, sizeof(T), ibo, attribFormats);
+}
+template<typename T>
+inline GLVertexArrayRef RenderSystem::CreateVertexArray(const std::vector<T>& vertices, const std::vector<uint32_t>& indices, const std::vector<AttribFormat>& attribFormats)
+{
+	GLBufferRef vbo = CreateBuffer(vertices);
+	GLBufferRef ibo = CreateBuffer(indices);
+	return CreateVertexArray(vbo, sizeof(T), ibo, attribFormats);
+}
+
+template<typename T>
+inline GLGeometryRef RenderSystem::CreateGeometry(const std::vector<T>& vertices, const std::vector<uint8_t>& indices, const std::vector<AttribFormat>& attribFormats)
+{
+	GLGeometryRef resource = std::make_shared< GLGeometry>();
+	resource->vbo = CreateBuffer(vertices);
+	resource->vertexSize = sizeof(T);
+	resource->ibo = CreateBuffer(indices);
+	resource->indexFormat = IndexFormat::UInt8;
+	resource->vao = CreateVertexArray(resource->vbo, resource->vertexSize, resource->ibo, attribFormats);
+	return resource;
+}
+
+template<typename T>
+inline GLGeometryRef RenderSystem::CreateGeometry(const std::vector<T>& vertices, const std::vector<uint16_t>& indices, const std::vector<AttribFormat>& attribFormats)
+{
+	GLGeometryRef resource = std::make_shared< GLGeometry>();
+	resource->vbo = CreateBuffer(vertices);
+	resource->vertexSize = sizeof(T);
+	resource->ibo = CreateBuffer(indices);
+	resource->indexFormat = IndexFormat::UInt16;
+	resource->vao = CreateVertexArray(resource->vbo, resource->vertexSize, resource->ibo, attribFormats);
+	return resource;
+}
+template<typename T>
+inline GLGeometryRef RenderSystem::CreateGeometry(const std::vector<T>& vertices, const std::vector<uint32_t>& indices, const std::vector<AttribFormat>& attribFormats)
+{
+	GLGeometryRef resource = std::make_shared< GLGeometry>();
+	resource->vbo = CreateBuffer(vertices);
+	resource->vertexSize = sizeof(T);
+	resource->ibo = CreateBuffer(indices);
+	resource->indexFormat = IndexFormat::UInt32;
+	resource->vao = CreateVertexArray(resource->vbo, resource->vertexSize, resource->ibo, attribFormats);
+	return resource;
+}
+
+template<typename T>
+inline void RenderSystem::SetUniform(GLProgramObjectRef shader, GLint location, T const& value)
+{
+	if constexpr (std::is_same_v<T, GLint>) glProgramUniform1i(*shader, location, value);
+	else if constexpr (std::is_same_v<T, GLuint>) glProgramUniform1ui(*shader, location, value);
+	else if constexpr (std::is_same_v<T, bool>) glProgramUniform1ui(*shader, location, value);
+	else if constexpr (std::is_same_v<T, GLfloat>) glProgramUniform1f(*shader, location, value);
+	else if constexpr (std::is_same_v<T, GLdouble>) glProgramUniform1d(*shader, location, value);
+	else if constexpr (std::is_same_v<T, glm::vec2>) glProgramUniform2fv(*shader, location, 1, glm::value_ptr(value));
+	else if constexpr (std::is_same_v<T, glm::vec3>) glProgramUniform3fv(*shader, location, 1, glm::value_ptr(value));
+	else if constexpr (std::is_same_v<T, glm::vec4>) glProgramUniform4fv(*shader, location, 1, glm::value_ptr(value));
+	else if constexpr (std::is_same_v<T, glm::ivec2>) glProgramUniform2iv(*shader, location, 1, glm::value_ptr(value));
+	else if constexpr (std::is_same_v<T, glm::ivec3>) glProgramUniform3iv(*shader, location, 1, glm::value_ptr(value));
+	else if constexpr (std::is_same_v<T, glm::ivec4>) glProgramUniform4iv(*shader, location, 1, glm::value_ptr(value));
+	else if constexpr (std::is_same_v<T, glm::uvec2>) glProgramUniform2uiv(*shader, location, 1, glm::value_ptr(value));
+	else if constexpr (std::is_same_v<T, glm::uvec3>) glProgramUniform3uiv(*shader, location, 1, glm::value_ptr(value));
+	else if constexpr (std::is_same_v<T, glm::uvec4>) glProgramUniform4uiv(*shader, location, 1, glm::value_ptr(value));
+	else if constexpr (std::is_same_v<T, glm::quat>) glProgramUniform4fv(*shader, location, 1, glm::value_ptr(value));
+	else if constexpr (std::is_same_v<T, glm::mat3>) glProgramUniformMatrix3fv(*shader, location, 1, GL_FALSE, glm::value_ptr(value));
+	else if constexpr (std::is_same_v<T, glm::mat4>) glProgramUniformMatrix4fv(*shader, location, 1, GL_FALSE, glm::value_ptr(value));
+	else LogFatal("unsupported type");
+}
