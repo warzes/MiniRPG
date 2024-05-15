@@ -65,6 +65,25 @@ inline GLGeometryRef RenderSystem::CreateGeometry(const std::vector<T>& vertices
 }
 
 template<typename T>
+inline GLTextureRef RenderSystem::CreateTextureCube(GLenum internalFormat, GLenum format, GLsizei width, GLsizei height, std::array<T*, 6> const& data)
+{
+	GLTextureRef tex = CreateTextureCube();
+	glTextureStorage2D(*tex, 1, internalFormat, width, height);
+	for (GLint i = 0; i < 6; ++i)
+	{
+		if (data[i])
+		{
+			glTextureSubImage3D(*tex, 0, 0, 0, i, width, height, 1, format, GL_UNSIGNED_BYTE, data[i]);
+		}
+	}
+	// Fix cubemap seams
+	glTextureParameteri(*tex, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTextureParameteri(*tex, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	return tex;
+}
+
+template<typename T>
 inline void RenderSystem::SetUniform(GLProgramObjectRef shader, GLint location, T const& value)
 {
 	if constexpr (std::is_same_v<T, GLint>) glProgramUniform1i(*shader, location, value);

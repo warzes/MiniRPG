@@ -9,19 +9,10 @@
     <ClCompile Include="TestApp.cpp">
       <Filter>App</Filter>
     </ClCompile>
-    <ClCompile Include="Framebuffer.cpp">
-      <Filter>Temp</Filter>
-    </ClCompile>
     <ClCompile Include="Model.cpp">
       <Filter>Temp</Filter>
     </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>Temp</Filter>
-    </ClCompile>
     <ClCompile Include="Util.cpp">
-      <Filter>Temp</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
       <Filter>Temp</Filter>
     </ClCompile>
     <ClCompile Include="Ssao.cpp">
@@ -36,19 +27,10 @@
     <ClInclude Include="TestApp.h">
       <Filter>App</Filter>
     </ClInclude>
-    <ClInclude Include="Framebuffer.h">
-      <Filter>Temp</Filter>
-    </ClInclude>
     <ClInclude Include="Model.h">
       <Filter>Temp</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Temp</Filter>
-    </ClInclude>
     <ClInclude Include="Util.h">
-      <Filter>Temp</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
       <Filter>Temp</Filter>
     </ClInclude>
     <ClInclude Include="Ssao.h">

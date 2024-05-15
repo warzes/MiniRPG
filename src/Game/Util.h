@@ -1,6 +1,5 @@
 #pragma once
 
-std::string read_text_file(std::string_view filepath);
 
 template<typename ... Args>
 std::string string_format(const std::string& format, Args ... args)

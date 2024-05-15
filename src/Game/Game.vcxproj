@@ -95,29 +95,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Framebuffer.cpp" />
     <ClCompile Include="GameApp.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
-    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Ssao.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TestApp.cpp" />
-    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Framebuffer.h" />
     <ClInclude Include="GameApp.h" />
     <ClInclude Include="Model.h" />
-    <ClInclude Include="Shader.h" />
     <ClInclude Include="Ssao.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TestApp.h" />
-    <ClInclude Include="Texture.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>

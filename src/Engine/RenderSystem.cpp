@@ -190,6 +190,119 @@ GLVertexArrayRef RenderSystem::CreateVertexArray(GLBufferRef vbo, size_t vertexS
 	return vao;
 }
 //-----------------------------------------------------------------------------
+GLTextureRef RenderSystem::CreateTexture2D()
+{
+	return std::make_shared<GLTexture>(GL_TEXTURE_2D);
+}
+//-----------------------------------------------------------------------------
+GLTextureRef RenderSystem::CreateTexture2D(GLenum internalFormat, GLenum format, GLsizei width, GLsizei height, void* data, GLenum filter, GLenum repeat, bool generateMipMaps)
+{
+	GLTextureRef texture = CreateTexture2D();
+
+	int levels = 1;
+	if (generateMipMaps)
+		levels = 1 + (int)std::floor(std::log2(std::min(width, height)));
+
+	glTextureStorage2D(*texture, levels, internalFormat, width, height);
+
+	if (generateMipMaps)
+	{
+		if (filter == GL_LINEAR)
+			glTextureParameteri(*texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		else if (filter == GL_NEAREST)
+			glTextureParameteri(*texture, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		else
+			LogFatal("Unsupported filter");
+	}
+	else
+	{
+		glTextureParameteri(*texture, GL_TEXTURE_MIN_FILTER, filter);
+	}
+	glTextureParameteri(*texture, GL_TEXTURE_MAG_FILTER, filter);
+
+	glTextureParameteri(*texture, GL_TEXTURE_WRAP_S, repeat);
+	glTextureParameteri(*texture, GL_TEXTURE_WRAP_T, repeat);
+	glTextureParameteri(*texture, GL_TEXTURE_WRAP_R, repeat);
+
+	if (data)
+		glTextureSubImage2D(*texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
+
+	if (generateMipMaps) 
+		glGenerateTextureMipmap(*texture);
+
+	return texture;
+}
+//-----------------------------------------------------------------------------
+GLTextureRef RenderSystem::CreateTexture2DFromFile(std::string_view filepath, int comp, bool generateMipMaps)
+{
+	int x, y, c;
+	if (!std::filesystem::exists(filepath.data()))
+	{
+		std::ostringstream message;
+		message << "file " << filepath.data() << " does not exist.";
+		LogFatal(message.str());
+	}
+	const auto data = stbi_load(filepath.data(), &x, &y, &c, comp);
+
+	auto const [in, ex] = [comp]() {
+		switch (comp)
+		{
+		case STBI_rgb_alpha:	return std::make_pair(GL_RGBA8, GL_RGBA);
+		case STBI_rgb:			return std::make_pair(GL_RGB8, GL_RGB);
+		case STBI_grey:			return std::make_pair(GL_R8, GL_RED);
+		case STBI_grey_alpha:	return std::make_pair(GL_RG8, GL_RG);
+		default: LogFatal("invalid format");
+		}
+		}();
+
+	const auto tex = CreateTexture2D(in, ex, x, y, data, GL_LINEAR, GL_REPEAT, generateMipMaps);
+	stbi_image_free(data);
+	return tex;
+}
+//-----------------------------------------------------------------------------
+GLTextureRef RenderSystem::CreateTextureCube()
+{
+	return std::make_shared<GLTexture>(GL_TEXTURE_CUBE_MAP);
+}
+//-----------------------------------------------------------------------------
+GLTextureRef RenderSystem::CreateTextureCubeFromFile(std::array<std::string_view, 6> const& filepath, int comp)
+{
+	int x, y, c;
+	std::array<stbi_uc*, 6> faces;
+
+	auto const [in, ex] = [comp]() {
+		switch (comp)
+		{
+		case STBI_rgb_alpha:	return std::make_pair(GL_RGBA8, GL_RGBA);
+		case STBI_rgb:			return std::make_pair(GL_RGB8, GL_RGB);
+		case STBI_grey:			return std::make_pair(GL_R8, GL_RED);
+		case STBI_grey_alpha:	return std::make_pair(GL_RG8, GL_RG);
+		default: throw std::runtime_error("invalid format");
+		}
+		}();
+
+	for (auto i = 0; i < 6; i++)
+		faces[i] = stbi_load(filepath[i].data(), &x, &y, &c, comp);
+
+	const auto tex = CreateTextureCube(in, ex, x, y, faces);
+	for (auto face : faces)
+		stbi_image_free(face);
+
+	return tex;
+}
+//-----------------------------------------------------------------------------
+GLFramebufferRef RenderSystem::CreateFramebuffer()
+{
+	return std::make_shared<GLFramebuffer>();
+}
+//-----------------------------------------------------------------------------
+GLFramebufferRef RenderSystem::CreateFramebuffer(const std::vector<GLTextureRef>& cols, GLTextureRef depth)
+{
+	GLFramebufferRef fbo = CreateFramebuffer();
+	FramebufferSetTextures(fbo, cols, depth);
+	return fbo;
+}
+//-----------------------------------------------------------------------------
 void RenderSystem::ProgramPipelineSetProgramObjects(GLProgramPipelineRef pipeline, GLProgramObjectRef vertexShader, GLProgramObjectRef fragmentShader)
 {
 	assert(pipeline && *pipeline);
@@ -228,6 +341,29 @@ void RenderSystem::VertexArraySetIndexBuffer(GLVertexArrayRef vao, GLBufferRef i
 	glVertexArrayElementBuffer(*vao, *ibo);
 }
 //-----------------------------------------------------------------------------
+void RenderSystem::FramebufferSetTextures(GLFramebufferRef fbo, const std::vector<GLTextureRef>& cols, GLTextureRef depth)
+{
+	for (auto i = 0; i < cols.size(); i++)
+		glNamedFramebufferTexture(*fbo, GL_COLOR_ATTACHMENT0 + i, *cols[i], 0);
+
+	std::array<GLenum, 32> draw_buffs;
+	for (GLenum i = 0; i < cols.size(); i++)
+		draw_buffs[i] = GL_COLOR_ATTACHMENT0 + i;
+
+	glNamedFramebufferDrawBuffers(*fbo, cols.size(), draw_buffs.data());
+
+	if (depth)
+		glNamedFramebufferTexture(*fbo, GL_DEPTH_ATTACHMENT, *depth, 0);
+
+	if (glCheckNamedFramebufferStatus(*fbo, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		LogFatal("incomplete framebuffer");
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::FramebufferClear(GLFramebufferRef framebuffer, GLenum buffer, GLint drawbuffer, const GLfloat* value)
+{
+	glClearNamedFramebufferfv(*framebuffer, buffer, drawbuffer, value);
+}
+//-----------------------------------------------------------------------------
 void RenderSystem::Bind(GLProgramPipelineRef pipeline)
 {
 	glBindProgramPipeline(*pipeline);
@@ -243,10 +379,40 @@ void RenderSystem::Bind(GLGeometryRef geom)
 	glBindVertexArray(*geom->vao);
 }
 //-----------------------------------------------------------------------------
+void RenderSystem::BindSlot(GLTextureRef texture, GLuint unit)
+{
+	glBindTextureUnit(unit, *texture);
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::Bind(GLFramebufferRef framebuffer)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, *framebuffer);
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::MainFrameBuffer()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::BlitFrameBuffer(GLFramebufferRef readFramebuffer, GLFramebufferRef drawFramebuffer, 
+	GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, 
+	GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, 
+	GLbitfield mask, GLenum filter)
+{
+	GLuint readFramebufferId = 0;
+	GLuint drawFramebufferId = 0;
+	if (readFramebuffer != nullptr) readFramebufferId = *readFramebuffer;
+	if (drawFramebuffer != nullptr) drawFramebufferId = *drawFramebuffer;
 
-
-
-
+	glBlitNamedFramebuffer(
+		readFramebufferId,
+		drawFramebufferId,
+		srcX0, srcY0, srcX1, srcY1,
+		dstX0, dstY0, dstX1, dstY1,
+		mask, filter);
+}
+//-----------------------------------------------------------------------------
+// 
 //=============================================================================
 // OLD
 //=============================================================================

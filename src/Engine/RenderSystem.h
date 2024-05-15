@@ -59,6 +59,18 @@ public:
 	template<typename T>
 	GLGeometryRef CreateGeometry(const std::vector<T>& vertices, const std::vector<uint32_t>& indices, const std::vector<AttribFormat>& attribFormats);
 
+	GLTextureRef CreateTexture2D();
+	GLTextureRef CreateTexture2D(GLenum internalFormat, GLenum format, GLsizei width, GLsizei height, void* data = nullptr, GLenum filter = GL_LINEAR, GLenum repeat = GL_REPEAT, bool generateMipMaps = false);
+	GLTextureRef CreateTexture2DFromFile(std::string_view filepath, int comp = STBI_rgb_alpha, bool generateMipMaps = false);
+
+	GLTextureRef CreateTextureCube();
+	template<typename T = nullptr_t>
+	GLTextureRef CreateTextureCube(GLenum internalFormat, GLenum format, GLsizei width, GLsizei height, std::array<T*, 6> const& data);
+	GLTextureRef CreateTextureCubeFromFile(std::array<std::string_view, 6> const& filepath, int comp = STBI_rgb_alpha);
+
+	GLFramebufferRef CreateFramebuffer();
+	GLFramebufferRef CreateFramebuffer(const std::vector<GLTextureRef>& cols, GLTextureRef depth = nullptr);
+
 	//-------------------------------------------------------------------------
 	// Modify Resource
 	//-------------------------------------------------------------------------
@@ -71,8 +83,8 @@ public:
 	void VertexArraySetVertexBuffer(GLVertexArrayRef vao, GLBufferRef vbo, size_t vertexSize);
 	void VertexArraySetIndexBuffer(GLVertexArrayRef vao, GLBufferRef ibo);
 
-
-
+	void FramebufferSetTextures(GLFramebufferRef framebuffer, const std::vector<GLTextureRef>& cols, GLTextureRef depth = nullptr);
+	void FramebufferClear(GLFramebufferRef framebuffer, GLenum buffer, GLint drawbuffer, const GLfloat* value);
 
 	//-------------------------------------------------------------------------
 	// Bind Resource
@@ -80,7 +92,11 @@ public:
 	void Bind(GLProgramPipelineRef pipeline);
 	void Bind(GLVertexArrayRef vao);
 	void Bind(GLGeometryRef geom);
+	void BindSlot(GLTextureRef texture, GLuint unit);
+	void Bind(GLFramebufferRef framebuffer);
 
+	void MainFrameBuffer();
+	void BlitFrameBuffer(GLFramebufferRef readFramebuffer, GLFramebufferRef drawFramebuffer, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
 private:
 	Systems& m_systems;
 

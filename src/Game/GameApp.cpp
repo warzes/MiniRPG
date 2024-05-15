@@ -1,21 +1,32 @@
 #include "stdafx.h"
 #include "GameApp.h"
-#include "Framebuffer.h"
-#include "Shader.h"
 #include "Model.h"
-#include "Texture.h"
 #include "Util.h"
 
-using glDeleterFunc = void (APIENTRY*)(GLuint item);
-using glDeleterFuncv = void (APIENTRY*)(GLsizei n, const GLuint* items);
-inline void delete_items(glDeleterFuncv deleter, std::initializer_list<GLuint> items) { deleter(items.size(), items.begin()); }
-inline void delete_items(glDeleterFunc deleter, std::initializer_list<GLuint> items)
-{
-	for (size_t i = 0; i < items.size(); i++)
-	{
-		deleter(*(items.begin() + i));
-	}
-}
+// Shader code
+const char* blurFragSource =
+#include "blur.frag.glsl"
+;
+
+const char* blurVertSource =
+#include "blur.vert.glsl"
+;
+
+const char* gbufferFragSource =
+#include "gbuffer.frag.glsl"
+;
+
+const char* gbufferVertSource =
+#include "gbuffer.vert.glsl"
+;
+
+const char* mainFragSource =
+#include "main.frag.glsl"
+;
+
+const char* mainVertSource =
+#include "main.vert.glsl"
+;
 
 enum class shape_t
 {
@@ -119,11 +130,12 @@ void GameApp::Run()
 	//=============================================================================
 	//=============================================================================
 
-	auto const texture_cube_diffuse = create_texture_2d_from_file("data/textures/T_Default_D.png", STBI_rgb, true);
-	auto const texture_cube_specular = create_texture_2d_from_file("data/textures/T_Default_S.png", STBI_grey, true);
-	auto const texture_cube_normal = create_texture_2d_from_file("data/textures/T_Default_N.png", STBI_rgb, true);
-	auto const texture_cube_emissive = create_texture_2d_from_file("data/textures/T_Default_E.png", STBI_rgb, true);
-	auto const texture_skybox = create_texture_cube_from_file({
+	GLTextureRef textureCubeDiffuse = render.CreateTexture2DFromFile("data/textures/T_Default_D.png", STBI_rgb, true);
+	GLTextureRef textureCubeSpecular = render.CreateTexture2DFromFile("data/textures/T_Default_S.png", STBI_grey, true);
+	GLTextureRef textureCubeNormal = render.CreateTexture2DFromFile("data/textures/T_Default_N.png", STBI_rgb, true);
+	GLTextureRef textureCubeEmissive = render.CreateTexture2DFromFile("data/textures/T_Default_E.png", STBI_rgb, true);
+
+	GLTextureRef textureSkybox = render.CreateTextureCubeFromFile({
 			"data/textures/TC_AboveClouds_Xn.png",
 			"data/textures/TC_AboveClouds_Xp.png",
 			"data/textures/TC_AboveClouds_Yn.png",
@@ -136,21 +148,20 @@ void GameApp::Run()
 	int screen_height = window.GetHeight();
 
 	/* framebuffer textures */
-	auto const texture_gbuffer_color = create_texture_2d(GL_RGB8, GL_RGB, screen_width, screen_height, nullptr, GL_NEAREST);
+	GLTextureRef textureGBufferColor = render.CreateTexture2D(GL_RGB8, GL_RGB, screen_width, screen_height, nullptr, GL_NEAREST);
+	GLTextureRef textureGBufferPosition = render.CreateTexture2D(GL_RGB16F, GL_RGB, screen_width, screen_height, nullptr, GL_NEAREST);
+	GLTextureRef textureGBufferNormal = render.CreateTexture2D(GL_RGB16F, GL_RGB, screen_width, screen_height, nullptr, GL_NEAREST);
+	GLTextureRef textureGBufferAlbedo = render.CreateTexture2D(GL_RGBA16F, GL_RGBA, screen_width, screen_height, nullptr, GL_NEAREST);
+	GLTextureRef textureGBufferDepth = render.CreateTexture2D(GL_DEPTH_COMPONENT32, GL_DEPTH, screen_width, screen_height, nullptr, GL_NEAREST);
+	GLTextureRef textureGBufferVelocity = render.CreateTexture2D(GL_RG16F, GL_RG, screen_width, screen_height, nullptr, GL_NEAREST);
+	GLTextureRef textureGBufferEmissive = render.CreateTexture2D(GL_RGB8, GL_RGB, screen_width, screen_height, nullptr, GL_NEAREST);
 
-	auto const texture_gbuffer_position = create_texture_2d(GL_RGB16F, GL_RGB, screen_width, screen_height, nullptr, GL_NEAREST);
-	auto const texture_gbuffer_normal = create_texture_2d(GL_RGB16F, GL_RGB, screen_width, screen_height, nullptr, GL_NEAREST);
-	auto const texture_gbuffer_albedo = create_texture_2d(GL_RGBA16F, GL_RGBA, screen_width, screen_height, nullptr, GL_NEAREST);
-	auto const texture_gbuffer_depth = create_texture_2d(GL_DEPTH_COMPONENT32, GL_DEPTH, screen_width, screen_height, nullptr, GL_NEAREST);
-	auto const texture_gbuffer_velocity = create_texture_2d(GL_RG16F, GL_RG, screen_width, screen_height, nullptr, GL_NEAREST);
-	auto const texture_gbuffer_emissive = create_texture_2d(GL_RGB8, GL_RGB, screen_width, screen_height, nullptr, GL_NEAREST);
+	GLTextureRef textureMotionBlur = render.CreateTexture2D(GL_RGB8, GL_RGB, screen_width, screen_height, nullptr, GL_NEAREST);
+	GLTextureRef textureMotionBlurMask = render.CreateTexture2D(GL_R8, GL_RED, screen_width, screen_height, nullptr, GL_NEAREST);
 
-	auto const texture_motion_blur = create_texture_2d(GL_RGB8, GL_RGB, screen_width, screen_height, nullptr, GL_NEAREST);
-	auto const texture_motion_blur_mask = create_texture_2d(GL_R8, GL_RED, screen_width, screen_height, nullptr, GL_NEAREST);
-
-	auto const fb_gbuffer = create_framebuffer({ texture_gbuffer_position, texture_gbuffer_normal, texture_gbuffer_albedo, texture_gbuffer_velocity, texture_gbuffer_emissive }, texture_gbuffer_depth);
-	auto const fb_finalcolor = create_framebuffer({ texture_gbuffer_color });
-	auto const fb_blur = create_framebuffer({ texture_motion_blur });
+	GLFramebufferRef fbGBuffer = render.CreateFramebuffer({ textureGBufferPosition, textureGBufferNormal, textureGBufferAlbedo, textureGBufferVelocity, textureGBufferEmissive }, textureGBufferDepth);
+	GLFramebufferRef fbFinalColor = render.CreateFramebuffer({ textureGBufferColor });
+	GLFramebufferRef fbBlur = render.CreateFramebuffer({ textureMotionBlur });
 
 	/* vertex formatting information */
 	std::vector<AttribFormat> const vertex_format =
@@ -207,8 +218,6 @@ void GameApp::Run()
 	while (1)
 	{
 		if (window.ShouldQuit()) break;
-		//if (window.PeekMessages())
-		//	continue;
 		// Process events
 		while (const auto event = window.PollEvent())
 		{
@@ -312,19 +321,19 @@ void GameApp::Run()
 			glViewport(0, 0, viewport_width, viewport_height);
 
 			auto const depth_clear_val = 1.0f;
-			glClearNamedFramebufferfv(fb_gbuffer, GL_COLOR, 0, glm::value_ptr(glm::vec3(1.0f)));
-			glClearNamedFramebufferfv(fb_gbuffer, GL_COLOR, 1, glm::value_ptr(glm::vec3(1.0f)));
-			glClearNamedFramebufferfv(fb_gbuffer, GL_COLOR, 2, glm::value_ptr(glm::vec4(1.0f)));
-			glClearNamedFramebufferfv(fb_gbuffer, GL_COLOR, 3, glm::value_ptr(glm::vec2(1.0f)));
-			glClearNamedFramebufferfv(fb_gbuffer, GL_COLOR, 4, glm::value_ptr(glm::vec2(1.0f)));
-			glClearNamedFramebufferfv(fb_gbuffer, GL_DEPTH, 0, &depth_clear_val);
+			render.FramebufferClear(fbGBuffer, GL_COLOR, 0, glm::value_ptr(glm::vec3(1.0f)));
+			render.FramebufferClear(fbGBuffer, GL_COLOR, 1, glm::value_ptr(glm::vec3(1.0f)));
+			render.FramebufferClear(fbGBuffer, GL_COLOR, 2, glm::value_ptr(glm::vec4(1.0f)));
+			render.FramebufferClear(fbGBuffer, GL_COLOR, 3, glm::value_ptr(glm::vec2(1.0f)));
+			render.FramebufferClear(fbGBuffer, GL_COLOR, 4, glm::value_ptr(glm::vec2(1.0f)));
+			render.FramebufferClear(fbGBuffer, GL_DEPTH, 0, &depth_clear_val);
 
-			glBindFramebuffer(GL_FRAMEBUFFER, fb_gbuffer);
+			render.Bind(fbGBuffer);
 
-			glBindTextureUnit(0, texture_cube_diffuse);
-			glBindTextureUnit(1, texture_cube_specular);
-			glBindTextureUnit(2, texture_cube_normal);
-			glBindTextureUnit(3, texture_cube_emissive);
+			render.BindSlot(textureCubeDiffuse, 0);
+			render.BindSlot(textureCubeSpecular, 1);
+			render.BindSlot(textureCubeNormal, 2);
+			render.BindSlot(textureCubeEmissive, 3);
 
 			render.Bind(ppGBuffer);
 
@@ -357,17 +366,17 @@ void GameApp::Run()
 			}
 
 			/* actual shading pass */
-			glClearNamedFramebufferfv(fb_finalcolor, GL_COLOR, 0, glm::value_ptr(glm::vec3(0.2f, 0.6f, 1.0f)));
-			glClearNamedFramebufferfv(fb_finalcolor, GL_DEPTH, 0, &depth_clear_val);
+			render.FramebufferClear(fbFinalColor, GL_COLOR, 0, glm::value_ptr(glm::vec3(0.2f, 0.6f, 1.0f)));
+			render.FramebufferClear(fbFinalColor, GL_DEPTH, 0, &depth_clear_val);
 
-			glBindFramebuffer(GL_FRAMEBUFFER, fb_finalcolor);
+			render.Bind(fbFinalColor);
 
-			glBindTextureUnit(0, texture_gbuffer_position);
-			glBindTextureUnit(1, texture_gbuffer_normal);
-			glBindTextureUnit(2, texture_gbuffer_albedo);
-			glBindTextureUnit(3, texture_gbuffer_depth);
-			glBindTextureUnit(4, texture_gbuffer_emissive);
-			glBindTextureUnit(5, texture_skybox);
+			render.BindSlot(textureGBufferPosition, 0);
+			render.BindSlot(textureGBufferNormal, 1);
+			render.BindSlot(textureGBufferAlbedo, 2);
+			render.BindSlot(textureGBufferDepth, 3);
+			render.BindSlot(textureGBufferEmissive, 4);
+			render.BindSlot(textureSkybox, 5);
 
 			render.Bind(ppMain);
 			glBindVertexArray(vao_empty);
@@ -387,12 +396,12 @@ void GameApp::Run()
 
 			/* motion blur */
 
-			glClearNamedFramebufferfv(fb_blur, GL_COLOR, 0, glm::value_ptr(glm::vec3(0.0f)));
+			render.FramebufferClear(fbBlur, GL_COLOR, 0, glm::value_ptr(glm::vec3(0.0f)));
 
-			glBindFramebuffer(GL_FRAMEBUFFER, fb_blur);
+			render.Bind(fbBlur);
 
-			glBindTextureUnit(0, texture_gbuffer_color);
-			glBindTextureUnit(1, texture_gbuffer_velocity);
+			render.BindSlot(textureGBufferColor, 0);
+			render.BindSlot(textureGBufferVelocity, 1);
 
 			render.Bind(ppBlur);
 			glBindVertexArray(vao_empty);
@@ -408,8 +417,11 @@ void GameApp::Run()
 			/* scale raster */
 			glViewport(0, 0, window.GetWidth(), window.GetHeight());
 
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glBlitNamedFramebuffer(fb_blur, 0, 0, 0, viewport_width, viewport_height, 0, 0, window.GetWidth(), window.GetHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			render.MainFrameBuffer();
+			render.BlitFrameBuffer(fbBlur, nullptr, 
+				0, 0, viewport_width, viewport_height, 
+				0, 0, window.GetWidth(), window.GetHeight(), 
+				GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 		render.EndFrame();
 	}
@@ -419,25 +431,23 @@ void GameApp::Run()
 	ppMain.reset();
 	ppGBuffer.reset();
 	ppBlur.reset();
+	textureCubeDiffuse.reset();
+	textureCubeSpecular.reset();
+	textureCubeNormal.reset();
+	textureCubeEmissive.reset();
+	textureSkybox.reset();
 
-	delete_items(glDeleteTextures,
-		{
-		texture_cube_diffuse,
-		texture_cube_specular,
-		texture_cube_normal,
+	textureGBufferPosition.reset();
+	textureGBufferAlbedo.reset();
+	textureGBufferNormal.reset();
+	textureGBufferDepth.reset();
+	textureGBufferColor.reset();
+	textureMotionBlur.reset();
+	textureMotionBlurMask.reset();
 
-		texture_gbuffer_position,
-		texture_gbuffer_albedo,
-		texture_gbuffer_normal,
-		texture_gbuffer_depth,
-		texture_gbuffer_color,
-
-		texture_skybox,
-
-		texture_motion_blur,
-		texture_motion_blur_mask
-		});
-	delete_items(glDeleteFramebuffers, { fb_gbuffer, fb_finalcolor, fb_blur });
+	fbGBuffer.reset();
+	fbFinalColor.reset();
+	fbBlur.reset();
 
 	render.Destroy();
 	window.Destroy();
