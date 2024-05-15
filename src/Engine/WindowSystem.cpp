@@ -481,7 +481,7 @@ void WindowSystem::filterEvent(const Event& event)
 	{
 		// Cache the new size
 		m_frameWidth = resized->size.x;
-		m_frameHeight = resized->size.x;
+		m_frameHeight = resized->size.y;
 
 		// Notify the derived class
 		if (m_eventsHandle) m_eventsHandle->Resize(m_frameWidth, m_frameHeight);

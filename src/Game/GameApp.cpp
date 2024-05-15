@@ -104,6 +104,112 @@ std::vector<uint8_t> const indices_quad =
 	0,   1,  2,  2,  3,  0,
 };
 
+
+struct GBuffer
+{
+	void Create(RenderSystem& render, int width, int height)
+	{
+		Destroy();
+
+		textureGBufferPosition = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
+		textureGBufferNormal = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
+		textureGBufferAlbedo = render.CreateTexture2D(GL_RGBA16F, GL_RGBA, width, height, nullptr, GL_NEAREST);
+		textureGBufferDepth = render.CreateTexture2D(GL_DEPTH_COMPONENT32, GL_DEPTH, width, height, nullptr, GL_NEAREST);
+		textureGBufferVelocity = render.CreateTexture2D(GL_RG16F, GL_RG, width, height, nullptr, GL_NEAREST);
+		textureGBufferEmissive = render.CreateTexture2D(GL_RGB8, GL_RGB, width, height, nullptr, GL_NEAREST);
+
+		fbGBuffer = render.CreateFramebuffer({ textureGBufferPosition, textureGBufferNormal, textureGBufferAlbedo, textureGBufferVelocity, textureGBufferEmissive }, textureGBufferDepth);
+	}
+
+	void Destroy()
+	{
+		textureGBufferPosition.reset();
+		textureGBufferAlbedo.reset();
+		textureGBufferNormal.reset();
+		textureGBufferDepth.reset();
+
+		fbGBuffer.reset();
+	}
+
+	void Bind(RenderSystem& render)
+	{
+		const auto depth_clear_val = 1.0f;
+		render.FramebufferClear(fbGBuffer, GL_COLOR, 0, glm::value_ptr(glm::vec3(1.0f)));
+		render.FramebufferClear(fbGBuffer, GL_COLOR, 1, glm::value_ptr(glm::vec3(1.0f)));
+		render.FramebufferClear(fbGBuffer, GL_COLOR, 2, glm::value_ptr(glm::vec4(1.0f)));
+		render.FramebufferClear(fbGBuffer, GL_COLOR, 3, glm::value_ptr(glm::vec2(1.0f)));
+		render.FramebufferClear(fbGBuffer, GL_COLOR, 4, glm::value_ptr(glm::vec2(1.0f)));
+		render.FramebufferClear(fbGBuffer, GL_DEPTH, 0, &depth_clear_val);
+
+		render.Bind(fbGBuffer);
+	}
+
+	GLFramebufferRef fbGBuffer = nullptr;
+
+	GLTextureRef textureGBufferPosition = nullptr;
+	GLTextureRef textureGBufferNormal = nullptr;
+	GLTextureRef textureGBufferAlbedo = nullptr;
+	GLTextureRef textureGBufferVelocity = nullptr;
+	GLTextureRef textureGBufferEmissive = nullptr;
+
+	GLTextureRef textureGBufferDepth = nullptr;
+};
+
+struct Blur
+{
+	void Create(RenderSystem& render, int width, int height)
+	{
+		Destroy();
+
+		textureMotionBlur = render.CreateTexture2D(GL_RGB8, GL_RGB, width, height, nullptr, GL_NEAREST);
+		fbBlur = render.CreateFramebuffer({ textureMotionBlur });
+	}
+
+	void Destroy()
+	{
+		textureMotionBlur.reset();
+		fbBlur.reset();
+	}
+
+	void Bind(RenderSystem& render)
+	{
+		render.FramebufferClear(fbBlur, GL_COLOR, 0, glm::value_ptr(glm::vec3(0.0f)));
+		render.Bind(fbBlur);
+	}
+
+	GLFramebufferRef fbBlur = nullptr;
+	GLTextureRef textureMotionBlur = nullptr;
+};
+
+struct FinalColor
+{
+	void Create(RenderSystem& render, int width, int height)
+	{
+		Destroy();
+
+		textureGBufferColor = render.CreateTexture2D(GL_RGB8, GL_RGB, width, height, nullptr, GL_NEAREST);
+		fbFinalColor = render.CreateFramebuffer({ textureGBufferColor });
+	}
+
+	void Destroy()
+	{
+		textureGBufferColor.reset();
+		fbFinalColor.reset();
+	}
+
+	void Bind(RenderSystem& render)
+	{
+		const auto depth_clear_val = 1.0f;
+		render.FramebufferClear(fbFinalColor, GL_COLOR, 0, glm::value_ptr(glm::vec3(0.2f, 0.6f, 1.0f)));
+		render.FramebufferClear(fbFinalColor, GL_DEPTH, 0, &depth_clear_val);
+
+		render.Bind(fbFinalColor);
+	}
+
+	GLFramebufferRef fbFinalColor = nullptr;
+	GLTextureRef textureGBufferColor = nullptr;
+};
+
 void GameApp::Run()
 {
 	Systems systems;
@@ -148,20 +254,15 @@ void GameApp::Run()
 	int screen_height = window.GetHeight();
 
 	/* framebuffer textures */
-	GLTextureRef textureGBufferColor = render.CreateTexture2D(GL_RGB8, GL_RGB, screen_width, screen_height, nullptr, GL_NEAREST);
-	GLTextureRef textureGBufferPosition = render.CreateTexture2D(GL_RGB16F, GL_RGB, screen_width, screen_height, nullptr, GL_NEAREST);
-	GLTextureRef textureGBufferNormal = render.CreateTexture2D(GL_RGB16F, GL_RGB, screen_width, screen_height, nullptr, GL_NEAREST);
-	GLTextureRef textureGBufferAlbedo = render.CreateTexture2D(GL_RGBA16F, GL_RGBA, screen_width, screen_height, nullptr, GL_NEAREST);
-	GLTextureRef textureGBufferDepth = render.CreateTexture2D(GL_DEPTH_COMPONENT32, GL_DEPTH, screen_width, screen_height, nullptr, GL_NEAREST);
-	GLTextureRef textureGBufferVelocity = render.CreateTexture2D(GL_RG16F, GL_RG, screen_width, screen_height, nullptr, GL_NEAREST);
-	GLTextureRef textureGBufferEmissive = render.CreateTexture2D(GL_RGB8, GL_RGB, screen_width, screen_height, nullptr, GL_NEAREST);
 
-	GLTextureRef textureMotionBlur = render.CreateTexture2D(GL_RGB8, GL_RGB, screen_width, screen_height, nullptr, GL_NEAREST);
-	GLTextureRef textureMotionBlurMask = render.CreateTexture2D(GL_R8, GL_RED, screen_width, screen_height, nullptr, GL_NEAREST);
+	GBuffer gbuffer;
+	gbuffer.Create(render, screen_width, screen_height);
 
-	GLFramebufferRef fbGBuffer = render.CreateFramebuffer({ textureGBufferPosition, textureGBufferNormal, textureGBufferAlbedo, textureGBufferVelocity, textureGBufferEmissive }, textureGBufferDepth);
-	GLFramebufferRef fbFinalColor = render.CreateFramebuffer({ textureGBufferColor });
-	GLFramebufferRef fbBlur = render.CreateFramebuffer({ textureMotionBlur });
+	Blur blur;
+	blur.Create(render, screen_width, screen_height);
+
+	FinalColor finalColor;
+	finalColor.Create(render, screen_width, screen_height);
 
 	/* vertex formatting information */
 	std::vector<AttribFormat> const vertex_format =
@@ -237,8 +338,12 @@ void GameApp::Run()
 				m_perspective = glm::perspective(glm::radians(60.0f), (float)width / (float)height, 0.1f, 1000.f);
 				render.SetViewport(width, height);
 
-				screen_width = window.GetWidth();
-				screen_height = window.GetHeight();
+				// resize framebuffer
+				gbuffer.Create(render, width, height);
+				blur.Create(render, width, height);
+				finalColor.Create(render, width, height);
+				screen_width = width;
+				screen_height = height;
 			}
 
 			if (const auto* mousePos = event.GetIf<Event::MouseMoved>())
@@ -316,19 +421,10 @@ void GameApp::Run()
 
 		{
 			/* g-buffer pass */
-			static auto const viewport_width = screen_width;
-			static auto const viewport_height = screen_height;
-			glViewport(0, 0, viewport_width, viewport_height);
+			glViewport(0, 0, screen_width, screen_height);
 
 			auto const depth_clear_val = 1.0f;
-			render.FramebufferClear(fbGBuffer, GL_COLOR, 0, glm::value_ptr(glm::vec3(1.0f)));
-			render.FramebufferClear(fbGBuffer, GL_COLOR, 1, glm::value_ptr(glm::vec3(1.0f)));
-			render.FramebufferClear(fbGBuffer, GL_COLOR, 2, glm::value_ptr(glm::vec4(1.0f)));
-			render.FramebufferClear(fbGBuffer, GL_COLOR, 3, glm::value_ptr(glm::vec2(1.0f)));
-			render.FramebufferClear(fbGBuffer, GL_COLOR, 4, glm::value_ptr(glm::vec2(1.0f)));
-			render.FramebufferClear(fbGBuffer, GL_DEPTH, 0, &depth_clear_val);
-
-			render.Bind(fbGBuffer);
+			gbuffer.Bind(render);
 
 			render.BindSlot(textureCubeDiffuse, 0);
 			render.BindSlot(textureCubeSpecular, 1);
@@ -366,16 +462,13 @@ void GameApp::Run()
 			}
 
 			/* actual shading pass */
-			render.FramebufferClear(fbFinalColor, GL_COLOR, 0, glm::value_ptr(glm::vec3(0.2f, 0.6f, 1.0f)));
-			render.FramebufferClear(fbFinalColor, GL_DEPTH, 0, &depth_clear_val);
+			finalColor.Bind(render);
 
-			render.Bind(fbFinalColor);
-
-			render.BindSlot(textureGBufferPosition, 0);
-			render.BindSlot(textureGBufferNormal, 1);
-			render.BindSlot(textureGBufferAlbedo, 2);
-			render.BindSlot(textureGBufferDepth, 3);
-			render.BindSlot(textureGBufferEmissive, 4);
+			render.BindSlot(gbuffer.textureGBufferPosition, 0);
+			render.BindSlot(gbuffer.textureGBufferNormal, 1);
+			render.BindSlot(gbuffer.textureGBufferAlbedo, 2);
+			render.BindSlot(gbuffer.textureGBufferDepth, 3);
+			render.BindSlot(gbuffer.textureGBufferEmissive, 4);
 			render.BindSlot(textureSkybox, 5);
 
 			render.Bind(ppMain);
@@ -386,40 +479,39 @@ void GameApp::Run()
 			render.SetUniform(ppMain->GetFragmentShader(), uniform_light_pos, light_pos);
 			render.SetUniform(ppMain->GetVertexShader(), uniform_cam_dir, glm::inverse(glm::mat3(m_camera.GetViewMatrix())));
 			render.SetUniform(ppMain->GetVertexShader(), uniform_fov, fov);
-			render.SetUniform(ppMain->GetVertexShader(), uniform_aspect, float(viewport_width) / float(viewport_height));
+			render.SetUniform(ppMain->GetVertexShader(), uniform_aspect, float(screen_width) / float(screen_height));
 			render.SetUniform(ppMain->GetVertexShader(), uniform_uvs_diff, glm::vec2(
-				float(viewport_width) / float(screen_width),
-				float(viewport_height) / float(screen_height)
+				float(screen_width) / float(screen_width),
+				float(screen_height) / float(screen_height)
 			));
 
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
 			/* motion blur */
 
-			render.FramebufferClear(fbBlur, GL_COLOR, 0, glm::value_ptr(glm::vec3(0.0f)));
+			blur.Bind(render);
 
-			render.Bind(fbBlur);
-
-			render.BindSlot(textureGBufferColor, 0);
-			render.BindSlot(textureGBufferVelocity, 1);
+			render.BindSlot(finalColor.textureGBufferColor, 0);
+			render.BindSlot(gbuffer.textureGBufferVelocity, 1);
 
 			render.Bind(ppBlur);
 			glBindVertexArray(vao_empty);
 
 			render.SetUniform(ppBlur->GetFragmentShader(), uniform_blur_bias, 0.03f/*float(fps_sum) / float(60)*/);
 			render.SetUniform(ppBlur->GetVertexShader(), uniform_uvs_diff, glm::vec2(
-				float(viewport_width) / float(screen_width),
-				float(viewport_height) / float(screen_height)
+				float(screen_width) / float(screen_width),
+				float(screen_height) / float(screen_height)
 			));
 
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
 			/* scale raster */
+			puts(("size=" + std::to_string(window.GetWidth()) + ":" + std::to_string(window.GetHeight())).c_str());
 			glViewport(0, 0, window.GetWidth(), window.GetHeight());
 
 			render.MainFrameBuffer();
-			render.BlitFrameBuffer(fbBlur, nullptr, 
-				0, 0, viewport_width, viewport_height, 
+			render.BlitFrameBuffer(blur.fbBlur, nullptr, 
+				0, 0, screen_width, screen_height,
 				0, 0, window.GetWidth(), window.GetHeight(), 
 				GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
@@ -437,17 +529,9 @@ void GameApp::Run()
 	textureCubeEmissive.reset();
 	textureSkybox.reset();
 
-	textureGBufferPosition.reset();
-	textureGBufferAlbedo.reset();
-	textureGBufferNormal.reset();
-	textureGBufferDepth.reset();
-	textureGBufferColor.reset();
-	textureMotionBlur.reset();
-	textureMotionBlurMask.reset();
-
-	fbGBuffer.reset();
-	fbFinalColor.reset();
-	fbBlur.reset();
+	gbuffer.Destroy();
+	blur.Destroy();
+	finalColor.Destroy();
 
 	render.Destroy();
 	window.Destroy();

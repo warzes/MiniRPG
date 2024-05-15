@@ -166,6 +166,7 @@ using GLGeometryRef = std::shared_ptr<GLGeometry>;
 
 class GLTexture final
 {
+	friend class RenderSystem;
 public:
 	GLTexture() = delete;
 	GLTexture(GLenum target) { createHandle(target); }
@@ -206,6 +207,7 @@ using GLTextureRef = std::shared_ptr<GLTexture>;
 
 class GLFramebuffer final
 {
+	friend class RenderSystem;
 public:
 	GLFramebuffer() { createHandle(); }
 	GLFramebuffer(const GLFramebuffer&) = delete;
@@ -224,8 +226,6 @@ public:
 	operator GLuint() const noexcept { return m_handle; }
 	operator bool() const noexcept { return m_handle != 0; }
 
-	GLenum GetTarget() const noexcept { return m_target; }
-
 private:
 	void createHandle()
 	{
@@ -237,8 +237,12 @@ private:
 		if (m_handle != 0)
 			glDeleteFramebuffers(1, &m_handle);
 		m_handle = 0;
+		m_colorTextures.clear();
+		m_depthTexture.reset();
 	}
 	GLuint m_handle = 0;
-	GLenum m_target = 0;
+	std::vector<GLTextureRef> m_colorTextures;
+	GLTextureRef m_depthTexture = nullptr;
+
 };
 using GLFramebufferRef = std::shared_ptr<GLFramebuffer>;
