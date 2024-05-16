@@ -114,9 +114,9 @@ struct GBuffer
 		textureGBufferPosition = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
 		textureGBufferNormal = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
 		textureGBufferAlbedo = render.CreateTexture2D(GL_RGBA16F, GL_RGBA, width, height, nullptr, GL_NEAREST);
-		textureGBufferDepth = render.CreateTexture2D(GL_DEPTH_COMPONENT32, GL_DEPTH, width, height, nullptr, GL_NEAREST);
 		textureGBufferVelocity = render.CreateTexture2D(GL_RG16F, GL_RG, width, height, nullptr, GL_NEAREST);
 		textureGBufferEmissive = render.CreateTexture2D(GL_RGB8, GL_RGB, width, height, nullptr, GL_NEAREST);
+		textureGBufferDepth = render.CreateTexture2D(GL_DEPTH_COMPONENT32, GL_DEPTH, width, height, nullptr, GL_NEAREST);
 
 		fbGBuffer = render.CreateFramebuffer({ textureGBufferPosition, textureGBufferNormal, textureGBufferAlbedo, textureGBufferVelocity, textureGBufferEmissive }, textureGBufferDepth);
 	}
@@ -274,7 +274,7 @@ void GameApp::Run()
 	};
 
 	/* geometry buffers */
-	auto const vao_empty = [] { GLuint name = 0; glCreateVertexArrays(1, &name); return name; }();
+	GLVertexArrayRef VAOEmpty = render.CreateVertexArray();
 
 	GLGeometryRef cubeGeom = render.CreateGeometry(vertices_cube, indices_cube, vertex_format);
 	GLGeometryRef quadGeom = render.CreateGeometry(vertices_quad, indices_quad, vertex_format);
@@ -423,7 +423,6 @@ void GameApp::Run()
 			/* g-buffer pass */
 			glViewport(0, 0, screen_width, screen_height);
 
-			auto const depth_clear_val = 1.0f;
 			gbuffer.Bind(render);
 
 			render.BindSlot(textureCubeDiffuse, 0);
@@ -472,7 +471,7 @@ void GameApp::Run()
 			render.BindSlot(textureSkybox, 5);
 
 			render.Bind(ppMain);
-			glBindVertexArray(vao_empty);
+			render.Bind(VAOEmpty);
 
 			render.SetUniform(ppMain->GetFragmentShader(), uniform_cam_pos, m_camera.position);
 			render.SetUniform(ppMain->GetFragmentShader(), uniform_light_col, glm::vec3(1.0));
@@ -495,7 +494,7 @@ void GameApp::Run()
 			render.BindSlot(gbuffer.textureGBufferVelocity, 1);
 
 			render.Bind(ppBlur);
-			glBindVertexArray(vao_empty);
+			render.Bind(VAOEmpty);
 
 			render.SetUniform(ppBlur->GetFragmentShader(), uniform_blur_bias, 0.03f/*float(fps_sum) / float(60)*/);
 			render.SetUniform(ppBlur->GetVertexShader(), uniform_uvs_diff, glm::vec2(
@@ -506,9 +505,6 @@ void GameApp::Run()
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
 			/* scale raster */
-			puts(("size=" + std::to_string(window.GetWidth()) + ":" + std::to_string(window.GetHeight())).c_str());
-			glViewport(0, 0, window.GetWidth(), window.GetHeight());
-
 			render.MainFrameBuffer();
 			render.BlitFrameBuffer(blur.fbBlur, nullptr, 
 				0, 0, screen_width, screen_height,
@@ -532,6 +528,8 @@ void GameApp::Run()
 	gbuffer.Destroy();
 	blur.Destroy();
 	finalColor.Destroy();
+
+	VAOEmpty.reset();
 
 	render.Destroy();
 	window.Destroy();
