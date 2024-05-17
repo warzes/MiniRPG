@@ -20,20 +20,8 @@
     <ClCompile Include="RenderCore.cpp">
       <Filter>Render</Filter>
     </ClCompile>
-    <ClCompile Include="RenderResources.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
     <ClCompile Include="Image.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderSystem_Shader.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderSystem_Buffer.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderSystem_State.cpp">
-      <Filter>Render</Filter>
     </ClCompile>
     <ClCompile Include="Keyboard.cpp">
       <Filter>Platform</Filter>
@@ -57,13 +45,10 @@
       <Filter>Platform</Filter>
     </ClCompile>
     <ClCompile Include="RenderCamera.cpp">
-      <Filter>RenderNew</Filter>
+      <Filter>Render</Filter>
     </ClCompile>
-    <ClCompile Include="nRenderResources.cpp">
-      <Filter>RenderNew</Filter>
-    </ClCompile>
-    <ClCompile Include="nRenderCore.cpp">
-      <Filter>RenderNew</Filter>
+    <ClCompile Include="RenderResources.cpp">
+      <Filter>Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -90,9 +75,6 @@
       <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="RenderCore.h">
-      <Filter>Render</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderResources.h">
       <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="Image.h">
@@ -140,17 +122,14 @@
     <ClInclude Include="Sleep.h">
       <Filter>Platform</Filter>
     </ClInclude>
-    <ClInclude Include="RenderCamera.h">
-      <Filter>RenderNew</Filter>
-    </ClInclude>
-    <ClInclude Include="nRenderResources.h">
-      <Filter>RenderNew</Filter>
-    </ClInclude>
-    <ClInclude Include="nRenderCore.h">
-      <Filter>RenderNew</Filter>
-    </ClInclude>
     <ClInclude Include="Utils.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderCamera.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderResources.h">
+      <Filter>Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -172,11 +151,10 @@
     <Filter Include="Platform\priv">
       <UniqueIdentifier>{c708819e-d80c-48ae-b487-b63f7b363cea}</UniqueIdentifier>
     </Filter>
-    <Filter Include="RenderNew">
-      <UniqueIdentifier>{2edf50ab-2659-4213-b210-7dcc70dae74b}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="RenderSystem.inl" />
+    <None Include="RenderSystem.inl">
+      <Filter>Render</Filter>
+    </None>
   </ItemGroup>
 </Project>

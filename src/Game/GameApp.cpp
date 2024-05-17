@@ -227,7 +227,7 @@ void GameApp::Run()
 	glDisable(GL_BLEND); // из-за настроек рендера не рисует, поэтому отключаю
 
 	m_perspective = glm::perspective(glm::radians(60.0f), (float)window.GetWidth() / (float)window.GetHeight(), 0.1f, 1000.f);
-	render.SetViewport(window.GetWidth(), window.GetHeight());
+	glViewport(0, 0, window.GetWidth(), window.GetHeight());
 
 	glm::ivec2 lastMousePosition = Mouse::GetPosition(window);
 
@@ -336,7 +336,7 @@ void GameApp::Run()
 			{
 				const auto [width, height] = resized->size;
 				m_perspective = glm::perspective(glm::radians(60.0f), (float)width / (float)height, 0.1f, 1000.f);
-				render.SetViewport(width, height);
+				glViewport(0, 0, window.GetWidth(), window.GetHeight());
 
 				// resize framebuffer
 				gbuffer.Create(render, width, height);
@@ -344,6 +344,7 @@ void GameApp::Run()
 				finalColor.Create(render, width, height);
 				screen_width = width;
 				screen_height = height;
+				render.SetUniform(ppGBuffer->GetVertexShader(), uniform_projection, m_perspective);
 			}
 
 			if (const auto* mousePos = event.GetIf<Event::MouseMoved>())
@@ -512,6 +513,7 @@ void GameApp::Run()
 				GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 		render.EndFrame();
+		window.SwapBuffers();
 	}
 
 	cubeGeom.reset();

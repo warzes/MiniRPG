@@ -103,15 +103,10 @@
     <ClCompile Include="LogSystem.cpp" />
     <ClCompile Include="MemoryInputStream.cpp" />
     <ClCompile Include="Mouse.cpp" />
-    <ClCompile Include="nRenderCore.cpp" />
-    <ClCompile Include="nRenderResources.cpp" />
+    <ClCompile Include="RenderResources.cpp" />
     <ClCompile Include="RenderCamera.cpp" />
     <ClCompile Include="RenderCore.cpp" />
-    <ClCompile Include="RenderResources.cpp" />
     <ClCompile Include="RenderSystem.cpp" />
-    <ClCompile Include="RenderSystem_Buffer.cpp" />
-    <ClCompile Include="RenderSystem_Shader.cpp" />
-    <ClCompile Include="RenderSystem_State.cpp" />
     <ClCompile Include="Sleep.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -134,12 +129,10 @@
     <ClInclude Include="LogSystem.h" />
     <ClInclude Include="MemoryInputStream.h" />
     <ClInclude Include="Mouse.h" />
-    <ClInclude Include="nRenderCore.h" />
-    <ClInclude Include="nRenderResources.h" />
+    <ClInclude Include="RenderResources.h" />
     <ClInclude Include="PlatformEvent.h" />
     <ClInclude Include="RenderCamera.h" />
     <ClInclude Include="RenderCore.h" />
-    <ClInclude Include="RenderResources.h" />
     <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="Sleep.h" />
     <ClInclude Include="stdafx.h" />

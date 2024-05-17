@@ -31,18 +31,6 @@ namespace Capabilities
 // Core enum
 //=============================================================================
 
-enum class ResourceType : uint8_t
-{
-	Unknown,
-	Shader,
-	ShaderProgram,
-	VertexBuffer,
-	IndexBuffer,
-	VertexArray,
-	Texture2D,
-	Framebuffer
-};
-
 enum class ImageFormat : uint8_t
 {
 	None = 0,
@@ -182,14 +170,6 @@ enum class RasterizerFillMode : uint8_t
 // Shader enum
 //=============================================================================
 
-enum class ShaderSourceType : uint8_t
-{
-	CodeMemory,   // Refers to <code>sourceSize+1</code> bytes, describing shader high-level code (including null terminator).
-	CodeFile,     // Refers to <code>sourceSize+1</code> bytes, describing the filename of the shader high-level code (including null terminator).
-	BinaryBuffer, // Refers to <code>sourceSize</code> bytes, describing shader binary code.
-	BinaryFile,   // Refers to <code>sourceSize+1</code> bytes, describing the filename of the shader binary code (including null terminator).
-};
-
 enum class ShaderPipelineStage : uint8_t
 {
 	Vertex,        // Vertex shader type
@@ -305,6 +285,15 @@ enum class IndexFormat : uint8_t
 //=============================================================================
 // VertexArray enum
 //=============================================================================
+
+struct AttribFormat
+{
+	GLuint attribIndex = 0;
+	GLint size = 0;
+	GLenum type = 0;
+	GLuint relativeOffset = 0;
+};
+
 enum class PrimitiveTopology : uint8_t
 {
 	Points,
@@ -327,7 +316,7 @@ enum class PrimitiveTopology : uint8_t
 // Texture enum
 //=============================================================================
 
-enum class TextureType : uint8_t // TODO: èñïîëüçîâàòü
+enum class TextureType : uint8_t
 {
 #if !PLATFORM_EMSCRIPTEN
 	Texture1D,
@@ -396,64 +385,6 @@ enum class TextureCubeTarget : uint8_t
 };
 
 //=============================================================================
-// Framebuffer enum
-//=============================================================================
-
-enum class FramebufferAttachment : uint8_t
-{
-	ColorAttachment0,
-	ColorAttachment1,
-	ColorAttachment2,
-	ColorAttachment3,
-	ColorAttachment4,
-	ColorAttachment5,
-	ColorAttachment6,
-	ColorAttachment7,
-	ColorAttachment8,
-	ColorAttachment9,
-	ColorAttachment10,
-	ColorAttachment11,
-	ColorAttachment12,
-	ColorAttachment13,
-	ColorAttachment14,
-	ColorAttachment15,
-	DepthAttachment,
-	StencilAttachment,
-	DepthStencilAttachment
-};
-
-enum class FramebufferType : uint8_t
-{
-	ReadFramebuffer,
-	DrawFramebuffer,
-	Framebuffer
-};
-
-enum class FramebufferStatus : uint8_t
-{
-	FramebufferComplete,
-	FramebufferUndefined,
-	FramebufferIncompleteAttachment,
-	FramebufferIncompleteMissingAttachment,
-#if !PLATFORM_EMSCRIPTEN
-	FramebufferIncompleteDrawBuffer,
-	FramebufferIncompleteReadBuffer,
-#endif
-	FramebufferUnsupported,
-	FramebufferIncompleteMultisample,
-#if !PLATFORM_EMSCRIPTEN
-	FramebufferIncompleteLayerTargets
-#endif
-};
-
-enum class FramebufferBinding : uint8_t
-{
-	ReadFramebufferBinding,
-	DrawFramebufferBinding,
-	FramebufferBinding
-};
-
-//=============================================================================
 // Pipeline State Core
 //=============================================================================
 
@@ -503,186 +434,10 @@ struct BlendState final
 	bool enable = false;
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Depth bias descriptor structure to control fragment depth values.
-struct DepthBiasDescriptor
-{
-	// Specifies a scalar factor controlling the constant depth value added to each fragment. By default 0.0.
-	float constantFactor = 0.0f;
-	// Specifies a scalar factor applied to a fragment's slope in depth bias calculations. By default 0.0.
-	float slopeFactor = 0.0f;
-	// Specifies the maximum (or minimum) depth bias of a fragment. By default 0.0.	
-	float clamp = 0.0f;
-};
-
-inline bool IsPolygonOffsetEnabled(const DepthBiasDescriptor& desc)
-{
-	// Ignore clamp factor for this check, since it's useless without the other two parameters
-	return (desc.slopeFactor != 0.0f || desc.constantFactor != 0.0f);
-}
-
-struct RasterizerState final
-{
-	RasterizerFillMode polygonMode = RasterizerFillMode::Solid;
-	RasterizerCullMode cullMode = RasterizerCullMode::FrontAndBack;
-	// Specifies the parameters to bias fragment depth values.
-	DepthBiasDescriptor depthBias;
-	FaceOrientation face = FaceOrientation::CounterClockwiseFace;
-	// If enabled, primitives are discarded after optional stream-outputs but before the rasterization stage.
-	bool discardEnabled = false;
-	// If enabled, there is effectively no near and far clipping plane.
-	bool depthClampEnabled = false;
-	// Specifies whether scissor test is enabled or disabled.
-	bool scissorTestEnabled = false;
-	// Specifies whether multi-sampling is enabled or disabled.
-	bool multiSampleEnabled = false;
-	// Specifies whether lines are rendered with or without anti-aliasing.
-	bool antiAliasedLineEnabled = false;
-	// Specifies the width of all generated line primitives. 
-	float lineWidth = 1.0f;
-};
-
-
-
-//=============================================================================
-// Shader Core
-//=============================================================================
-
-// A class that can load shader sources in from files, and do some preprocessing on them.
-class ShaderBytecode final
-{
-public:
-	ShaderBytecode() = default;
-	// Loads in the shader from a memory data.
-	ShaderBytecode(const std::string& src) : m_sourceCode(src), m_shaderSource(ShaderSourceType::CodeMemory) {};
-	ShaderBytecode(ShaderBytecode&&) = default;
-	ShaderBytecode(const ShaderBytecode&) = default;
-	ShaderBytecode(ShaderSourceType shaderSource, const std::string& text);
-
-	ShaderBytecode& operator=(ShaderBytecode&&) = default;
-	ShaderBytecode& operator=(const ShaderBytecode&) = default;
-	ShaderBytecode& operator=(const std::string& src) { m_sourceCode = src; m_shaderSource = ShaderSourceType::CodeMemory; return *this; }
-
-	bool LoadFromFile(const std::string& file);
-
-	std::string& GetSource() { return m_sourceCode; }
-	const std::string& GetSource() const { return m_sourceCode; }
-	const std::string& GetPath() const { return m_path; }
-	const std::string& GetFilename() const { return m_filename; }
-	ShaderSourceType GetShaderSourceType() const { return m_shaderSource; }
-
-	bool IsValid() const { return m_sourceCode.length() > 0; }
-
-	template<typename T>
-	void InsertMacroValue(const std::string& macroName, const T& value)
-	{
-		size_t macroPos = m_sourceCode.find("#define " + macroName);
-#if defined(_DEBUG)
-		if (macroPos == std::string::npos)
-		{
-			LogFatal("ShaderBytecode::InsertMacroValue is called for '" + m_filename + "', but the shader doesn't have any macro named " + macroName);
-			return;
-		}
-#endif
-		size_t macroEnd = m_sourceCode.find('\n', macroPos);
-
-		std::stringstream sstream;
-		sstream << m_sourceCode.substr(0, macroPos + strlen("#define ") + macroName.length());
-		sstream << ' ' << value << m_sourceCode.substr(macroEnd);
-		m_sourceCode = sstream.str();
-	}
-
-	static std::string GetHeaderVertexShader();
-	static std::string GetHeaderFragmentShader();
-
-private:
-	std::string m_filename = "Unnamed shader";
-	std::string m_path;
-	std::string m_sourceCode;
-	ShaderSourceType m_shaderSource = ShaderSourceType::CodeMemory;
-};
-
-struct ShaderAttributeInfo final
-{
-	unsigned typeId;
-	unsigned type;
-	int numType;
-	std::string name;
-	int location;
-};
-
-struct Uniform final
-{
-	int location = -1;
-	unsigned programId = 0;
-};
-
-//=============================================================================
-// Buffer Core
-//=============================================================================
-
-struct VertexAttribute final
-{
-	unsigned location/* = -1*/;  // åñëè -1, òî áåðåòñÿ èíäåêñ ìàññèâà àòðèáóòîâ
-	int size;
-	//unsigned type;
-	bool normalized;
-	int stride;         // sizeof Vertex
-	const void* offset; // (void*)offsetof(Vertex, TexCoord)}
-};
-
-//=============================================================================
-// Texture Core
-//=============================================================================
-
-struct Texture2DInfo final
-{
-	TextureMinFilter minFilter = TextureMinFilter::NearestMipmapNearest;
-	TextureMagFilter magFilter = TextureMagFilter::Nearest;
-	TextureAddressMode wrapS = TextureAddressMode::Repeat;
-	TextureAddressMode wrapT = TextureAddressMode::Repeat;
-
-	bool verticallyFlip = false; // TODO: ïîêà ðàáîòàåò òîëüêî ïðè çàãðóçêå stb image
-	bool mipmap = true;
-};
-
-struct Texture2DCreateInfo final
-{
-	TexelsFormat format = TexelsFormat::RGBA_U8;
-	uint16_t width = 1;
-	uint16_t height = 1;
-	uint8_t* pixelData = nullptr;
-	unsigned mipMapCount = 1; // TODO: only compressed
-	bool hasTransparency = false;
-};
-
 //=============================================================================
 // OpenGLTranslateToGL
 //=============================================================================
 
-//-----------------------------------------------------------------------------
 [[nodiscard]] inline GLenum TranslateToGL(ImageFormat format)
 {
 	switch (format)
@@ -722,7 +477,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown ImageFormat");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline GLenum TranslateToGL(ComparisonFunction func)
 {
 	switch (func)
@@ -741,7 +496,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown ComparisonFunction");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline GLenum TranslateToGL(StencilOperation op)
 {
 	switch (op)
@@ -759,7 +514,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown StencilOp");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline GLenum TranslateToGL(BlendOperation op)
 {
 	switch (op)
@@ -774,7 +529,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown BlendOp");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline GLenum TranslateToGL(BlendFactor func)
 {
 	switch (func)
@@ -805,7 +560,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown BlendFactor");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline GLenum TranslateToGL(RasterizerCullMode face)
 {
 	switch (face)
@@ -818,7 +573,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown RasterCullMode");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline GLenum TranslateToGL(FaceOrientation orientation)
 {
 	switch (orientation)
@@ -830,7 +585,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown FaceOrientation");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 #if !PLATFORM_EMSCRIPTEN
 [[nodiscard]] inline GLenum TranslateToGL(RasterizerFillMode fillMode)
 {
@@ -845,7 +600,7 @@ struct Texture2DCreateInfo final
 	return 0;
 }
 #endif
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline GLenum TranslateToGL(ShaderPipelineStage usage)
 {
 	switch (usage)
@@ -863,7 +618,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown ShaderPipelineStage");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline std::string ConvertToStr(ShaderPipelineStage usage)
 {
 	switch (usage)
@@ -881,7 +636,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown ShaderType");
 	return "";
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline GLenum TranslateToGL(BufferTarget type)
 {
 	switch (type)
@@ -911,7 +666,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown BufferType");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline GLenum TranslateToGL(BufferUsage usage)
 {
 	switch (usage)
@@ -930,7 +685,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown BufferUsage");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 #if !PLATFORM_EMSCRIPTEN
 [[nodiscard]] inline GLenum TranslateToGL(BufferMapAccess access)
 {
@@ -945,7 +700,7 @@ struct Texture2DCreateInfo final
 	return 0;
 }
 #endif
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline GLenum TranslateToGL(BufferBinding binding)
 {
 	switch (binding)
@@ -974,7 +729,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown BufferBinding");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline BufferBinding GetBindingTarget(BufferTarget type)
 {
 	BufferBinding target;
@@ -1004,7 +759,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown BufferType");
 	return {};
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline GLenum TranslateToGL(BufferMapAccessFlags accessFlags)
 {
 	switch (accessFlags)
@@ -1024,7 +779,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown BufferMapAccessFlags");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline constexpr unsigned SizeIndexType(IndexFormat format)
 {
 	switch (format)
@@ -1037,7 +792,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown IndexType");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline constexpr unsigned SizeIndexType(unsigned size)
 {
 	switch (size)
@@ -1050,8 +805,8 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown size");
 	return 0;
 }
-//-----------------------------------------------------------------------------
-[[nodiscard]] inline GLenum TranslateToGL(IndexFormat type) // TODO: èñïîëüçîâàòü
+
+[[nodiscard]] inline GLenum TranslateToGL(IndexFormat type)
 {
 	switch (type)
 	{
@@ -1063,7 +818,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown IndexType");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline GLenum TranslateToGL(PrimitiveTopology topology)
 {
 	switch (topology)
@@ -1087,7 +842,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown PrimitiveTopology");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline constexpr GLint TranslateToGL(TextureType type)
 {
 	switch (type)
@@ -1108,7 +863,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown TextureType");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline GLint TranslateToGL(TextureMinFilter filter)
 {
 	switch (filter)
@@ -1124,7 +879,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown TextureMinFilter");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline constexpr GLint TranslateToGL(TextureMagFilter filter)
 {
 	switch (filter)
@@ -1136,7 +891,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown TextureMagFilter");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline GLint TranslateToGL(TextureAddressMode wrapMode)
 {
 	switch (wrapMode)
@@ -1152,7 +907,7 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown TextureAddressMode");
 	return 0;
 }
-//-----------------------------------------------------------------------------
+
 [[nodiscard]] inline GLenum TranslateToGL(TextureCubeTarget target)
 {
 	switch (target)
@@ -1168,173 +923,3 @@ struct Texture2DCreateInfo final
 	assert(false && "Unknown TextureCubeTarget");
 	return 0;
 }
-//-----------------------------------------------------------------------------
-[[nodiscard]] inline bool GetTextureFormatType(TexelsFormat inFormat, GLenum textureType, GLenum& format, GLint& internalFormat, GLenum& oglType)
-{
-	if (inFormat == TexelsFormat::R_U8)
-	{
-		format = GL_RED;
-		internalFormat = GL_R8;
-		oglType = GL_UNSIGNED_BYTE;
-	}
-	else if (inFormat == TexelsFormat::RG_U8)
-	{
-#if defined(_WIN32)
-		format = GL_RG;
-		internalFormat = GL_RG8;
-		oglType = GL_UNSIGNED_BYTE;
-		const GLint swizzleMask[] = { GL_RED, GL_RED, GL_RED, GL_GREEN };
-		glTexParameteriv(textureType, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask); // TODO: ìîãóò áûòü ïðîáëåìû ñ áðàóçåðàìè, òîãäà òîëüêî ãðóçèòü stb ñ óêàçàíèåì íóæíîãî ôîðìàòà
-#endif // _WIN32
-#if PLATFORM_EMSCRIPTEN
-		LogFatal("TexelsFormat::RG_U8 not support in web platform");
-		return false;
-#endif
-	}
-	else if (inFormat == TexelsFormat::RGB_U8)
-	{
-		format = GL_RGB;
-		internalFormat = GL_RGB;
-		oglType = GL_UNSIGNED_BYTE;
-	}
-	else if (inFormat == TexelsFormat::RGBA_U8)
-	{
-		format = GL_RGBA;
-		internalFormat = GL_RGBA8;
-		oglType = GL_UNSIGNED_BYTE;
-	}
-	else if (inFormat == TexelsFormat::R_F32)
-	{
-		format = GL_RED;
-		internalFormat = GL_R32F;
-		oglType = GL_FLOAT;
-	}
-	else if (inFormat == TexelsFormat::RG_F32)
-	{
-		format = GL_RG;
-		internalFormat = GL_RG32F;
-		oglType = GL_FLOAT;
-	}
-	else if (inFormat == TexelsFormat::Depth_U16)
-	{
-		format = GL_DEPTH_COMPONENT;
-		internalFormat = GL_DEPTH_COMPONENT16;
-		oglType = GL_UNSIGNED_SHORT;
-	}
-	else if (inFormat == TexelsFormat::DepthStencil_U16)
-	{
-		format = GL_DEPTH_STENCIL;
-		internalFormat = GL_DEPTH24_STENCIL8;
-		oglType = GL_UNSIGNED_SHORT;
-	}
-	else if (inFormat == TexelsFormat::Depth_U24)
-	{
-		format = GL_DEPTH_COMPONENT;
-		internalFormat = GL_DEPTH_COMPONENT24;
-		oglType = GL_UNSIGNED_INT;
-	}
-	else if (inFormat == TexelsFormat::DepthStencil_U24)
-	{
-		format = GL_DEPTH_STENCIL;
-		internalFormat = GL_DEPTH24_STENCIL8;
-		oglType = GL_UNSIGNED_INT;
-	}
-	else
-	{
-		//Error("unknown texture format");
-		return false;
-	}
-	return true;
-}
-//-----------------------------------------------------------------------------
-[[nodiscard]] inline GLenum TranslateToGL(FramebufferAttachment attachment)
-{
-	switch (attachment)
-	{
-	case FramebufferAttachment::ColorAttachment0:       return GL_COLOR_ATTACHMENT0;
-	case FramebufferAttachment::ColorAttachment1:       return GL_COLOR_ATTACHMENT1;
-	case FramebufferAttachment::ColorAttachment2:       return GL_COLOR_ATTACHMENT2;
-	case FramebufferAttachment::ColorAttachment3:       return GL_COLOR_ATTACHMENT3;
-	case FramebufferAttachment::ColorAttachment4:       return GL_COLOR_ATTACHMENT4;
-	case FramebufferAttachment::ColorAttachment5:       return GL_COLOR_ATTACHMENT5;
-	case FramebufferAttachment::ColorAttachment6:       return GL_COLOR_ATTACHMENT6;
-	case FramebufferAttachment::ColorAttachment7:       return GL_COLOR_ATTACHMENT7;
-	case FramebufferAttachment::ColorAttachment8:       return GL_COLOR_ATTACHMENT8;
-	case FramebufferAttachment::ColorAttachment9:       return GL_COLOR_ATTACHMENT9;
-	case FramebufferAttachment::ColorAttachment10:      return GL_COLOR_ATTACHMENT10;
-	case FramebufferAttachment::ColorAttachment11:      return GL_COLOR_ATTACHMENT11;
-	case FramebufferAttachment::ColorAttachment12:      return GL_COLOR_ATTACHMENT12;
-	case FramebufferAttachment::ColorAttachment13:      return GL_COLOR_ATTACHMENT13;
-	case FramebufferAttachment::ColorAttachment14:      return GL_COLOR_ATTACHMENT14;
-	case FramebufferAttachment::ColorAttachment15:      return GL_COLOR_ATTACHMENT15;
-	case FramebufferAttachment::DepthAttachment:        return GL_DEPTH_ATTACHMENT;
-	case FramebufferAttachment::StencilAttachment:      return GL_STENCIL_ATTACHMENT;
-	case FramebufferAttachment::DepthStencilAttachment: return GL_DEPTH_STENCIL_ATTACHMENT;
-	default: break;
-	}
-	assert(false && "Unknown TextureAddressMode");
-	return 0;
-}
-//-----------------------------------------------------------------------------
-[[nodiscard]] inline GLint TranslateToGL(FramebufferType type)
-{
-	switch (type)
-	{
-	case FramebufferType::ReadFramebuffer: return GL_READ_FRAMEBUFFER;
-	case FramebufferType::DrawFramebuffer: return GL_DRAW_FRAMEBUFFER;
-	case FramebufferType::Framebuffer:     return GL_FRAMEBUFFER;
-	default: break;
-	}
-	assert(false && "Unknown FramebufferType");
-	return 0;
-}
-//-----------------------------------------------------------------------------
-[[nodiscard]] inline GLint TranslateToGL(FramebufferStatus status)
-{
-	switch (status)
-	{
-	case FramebufferStatus::FramebufferComplete:                    return GL_FRAMEBUFFER_COMPLETE;
-	case FramebufferStatus::FramebufferUndefined:                   return GL_FRAMEBUFFER_UNDEFINED;
-	case FramebufferStatus::FramebufferIncompleteAttachment:        return GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
-	case FramebufferStatus::FramebufferIncompleteMissingAttachment: return GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT;
-#if !PLATFORM_EMSCRIPTEN
-	case FramebufferStatus::FramebufferIncompleteDrawBuffer:        return GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER;
-	case FramebufferStatus::FramebufferIncompleteReadBuffer:        return GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER;
-#endif
-	case FramebufferStatus::FramebufferUnsupported:                 return GL_FRAMEBUFFER_UNSUPPORTED;
-	case FramebufferStatus::FramebufferIncompleteMultisample:       return GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE;
-#if !PLATFORM_EMSCRIPTEN
-	case FramebufferStatus::FramebufferIncompleteLayerTargets:      return GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS;
-#endif
-	default: break;
-	}
-	assert(false && "Unknown FramebufferStatus");
-	return 0;
-}
-//-----------------------------------------------------------------------------
-[[nodiscard]] inline GLint TranslateToGL(FramebufferBinding binding)
-{
-	switch (binding)
-	{
-	case FramebufferBinding::ReadFramebufferBinding: return GL_READ_FRAMEBUFFER_BINDING;
-	case FramebufferBinding::DrawFramebufferBinding: return GL_DRAW_FRAMEBUFFER_BINDING;
-	case FramebufferBinding::FramebufferBinding:     return GL_FRAMEBUFFER_BINDING;
-	default: break;
-	}
-	assert(false && "Unknown FramebufferBinding");
-	return 0;
-}
-//-----------------------------------------------------------------------------
-[[nodiscard]] inline FramebufferBinding GetBindingTarget(FramebufferType type)
-{
-	switch (type)
-	{
-	case FramebufferType::ReadFramebuffer: return FramebufferBinding::ReadFramebufferBinding;
-	case FramebufferType::DrawFramebuffer: return FramebufferBinding::DrawFramebufferBinding;
-	case FramebufferType::Framebuffer:     return FramebufferBinding::FramebufferBinding;
-	default: break;
-	}
-	assert(false && "Unknown FramebufferType");
-	return {};
-}
-//-----------------------------------------------------------------------------
