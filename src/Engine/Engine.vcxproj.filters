@@ -50,6 +50,9 @@
     <ClCompile Include="RenderResources.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="GenerateUUID.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -131,6 +134,12 @@
     <ClInclude Include="RenderResources.h">
       <Filter>Render</Filter>
     </ClInclude>
+    <ClInclude Include="CheckSupportOGLExtensions.h">
+      <Filter>Render\Private</Filter>
+    </ClInclude>
+    <ClInclude Include="GenerateUUID.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -150,6 +159,15 @@
     </Filter>
     <Filter Include="Platform\priv">
       <UniqueIdentifier>{c708819e-d80c-48ae-b487-b63f7b363cea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\Private">
+      <UniqueIdentifier>{24b9f428-6ab2-4695-bebf-cc75930bf392}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math">
+      <UniqueIdentifier>{0c4cb0bd-2043-4783-b4a7-9bd149a664c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Base">
+      <UniqueIdentifier>{87146f67-ccc7-47d2-a453-3136b039b812}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

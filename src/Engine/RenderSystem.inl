@@ -1,7 +1,8 @@
 template<typename T>
 inline GLBufferRef RenderSystem::CreateBuffer(const std::vector<T>& buff, GLenum flags)
 {
-	GLBufferRef resource = std::make_shared<GLBuffer>();
+	auto resource = std::make_shared<GLBuffer>();
+	if (!IsValid(resource)) return nullptr;
 	glNamedBufferStorage(*resource, sizeof(typename std::vector<T>::value_type) * buff.size(), buff.data(), flags);
 	return resource;
 }
@@ -32,7 +33,7 @@ inline GLVertexArrayRef RenderSystem::CreateVertexArray(const std::vector<T>& ve
 template<typename T>
 inline GLGeometryRef RenderSystem::CreateGeometry(const std::vector<T>& vertices, const std::vector<uint8_t>& indices, const std::vector<AttribFormat>& attribFormats)
 {
-	GLGeometryRef resource = std::make_shared< GLGeometry>();
+	auto resource = std::make_shared<GLGeometry>();
 	resource->vbo = CreateBuffer(vertices);
 	resource->vertexSize = sizeof(T);
 	resource->ibo = CreateBuffer(indices);
@@ -44,7 +45,7 @@ inline GLGeometryRef RenderSystem::CreateGeometry(const std::vector<T>& vertices
 template<typename T>
 inline GLGeometryRef RenderSystem::CreateGeometry(const std::vector<T>& vertices, const std::vector<uint16_t>& indices, const std::vector<AttribFormat>& attribFormats)
 {
-	GLGeometryRef resource = std::make_shared< GLGeometry>();
+	auto resource = std::make_shared<GLGeometry>();
 	resource->vbo = CreateBuffer(vertices);
 	resource->vertexSize = sizeof(T);
 	resource->ibo = CreateBuffer(indices);
@@ -55,7 +56,7 @@ inline GLGeometryRef RenderSystem::CreateGeometry(const std::vector<T>& vertices
 template<typename T>
 inline GLGeometryRef RenderSystem::CreateGeometry(const std::vector<T>& vertices, const std::vector<uint32_t>& indices, const std::vector<AttribFormat>& attribFormats)
 {
-	GLGeometryRef resource = std::make_shared< GLGeometry>();
+	auto resource = std::make_shared<GLGeometry>();
 	resource->vbo = CreateBuffer(vertices);
 	resource->vertexSize = sizeof(T);
 	resource->ibo = CreateBuffer(indices);
@@ -67,25 +68,30 @@ inline GLGeometryRef RenderSystem::CreateGeometry(const std::vector<T>& vertices
 template<typename T>
 inline GLTextureRef RenderSystem::CreateTextureCube(GLenum internalFormat, GLenum format, GLsizei width, GLsizei height, std::array<T*, 6> const& data)
 {
-	GLTextureRef tex = CreateTextureCube();
-	glTextureStorage2D(*tex, 1, internalFormat, width, height);
+	auto resource = CreateTextureCube();
+	glTextureStorage2D(*resource, 1, internalFormat, width, height);
 	for (GLint i = 0; i < 6; ++i)
 	{
 		if (data[i])
 		{
-			glTextureSubImage3D(*tex, 0, 0, 0, i, width, height, 1, format, GL_UNSIGNED_BYTE, data[i]);
+			glTextureSubImage3D(*resource, 0, 0, 0, i, width, height, 1, format, GL_UNSIGNED_BYTE, data[i]);
 		}
 	}
 	// Fix cubemap seams
-	glTextureParameteri(*tex, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTextureParameteri(*tex, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTextureParameteri(*resource, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTextureParameteri(*resource, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	return tex;
+	return resource;
 }
 
 template<typename T>
-inline void RenderSystem::SetUniform(GLProgramObjectRef shader, GLint location, T const& value)
+inline void RenderSystem::SetUniform(GLSeparableShaderProgramRef shader, GLint location, const T& value)
 {
+	if (!IsValid(shader))
+	{
+		m_systems.log->Error("shader is null");
+		return;
+	}
 	if constexpr (std::is_same_v<T, GLint>) glProgramUniform1i(*shader, location, value);
 	else if constexpr (std::is_same_v<T, GLuint>) glProgramUniform1ui(*shader, location, value);
 	else if constexpr (std::is_same_v<T, bool>) glProgramUniform1ui(*shader, location, value);
@@ -103,5 +109,5 @@ inline void RenderSystem::SetUniform(GLProgramObjectRef shader, GLint location, 
 	else if constexpr (std::is_same_v<T, glm::quat>) glProgramUniform4fv(*shader, location, 1, glm::value_ptr(value));
 	else if constexpr (std::is_same_v<T, glm::mat3>) glProgramUniformMatrix3fv(*shader, location, 1, GL_FALSE, glm::value_ptr(value));
 	else if constexpr (std::is_same_v<T, glm::mat4>) glProgramUniformMatrix4fv(*shader, location, 1, GL_FALSE, glm::value_ptr(value));
-	else LogFatal("unsupported type");
+	else m_systems.log->Fatal("unsupported type");
 }

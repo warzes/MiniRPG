@@ -27,9 +27,9 @@ public:
 	// Create Resource
 	//-------------------------------------------------------------------------
 
-	GLProgramObjectRef CreateProgramObject(GLenum type, std::string_view source);
+	GLSeparableShaderProgramRef CreateProgramObject(GLenum shaderType, std::string_view sourceCode);
 	GLProgramPipelineRef CreateProgramPipeline();
-	GLProgramPipelineRef CreateProgramPipeline(GLProgramObjectRef vertexShader, GLProgramObjectRef fragmentShader);
+	GLProgramPipelineRef CreateProgramPipeline(GLSeparableShaderProgramRef vertexShader, GLSeparableShaderProgramRef fragmentShader);
 	GLProgramPipelineRef CreateProgramPipelineFromSources(std::string_view vertSource, std::string_view fragSource);
 	GLProgramPipelineRef CreateProgramPipelineFromFiles(std::string_view vertFilepath, std::string_view fragFilepath);
 
@@ -70,9 +70,9 @@ public:
 	// Modify Resource
 	//-------------------------------------------------------------------------
 	template <typename T>
-	void SetUniform(GLProgramObjectRef shader, GLint location, T const& value);
+	void SetUniform(GLSeparableShaderProgramRef shader, GLint location, const T& value);
 
-	void ProgramPipelineSetProgramObjects(GLProgramPipelineRef pipeline, GLProgramObjectRef vertexShader, GLProgramObjectRef fragmentShader);
+	void ProgramPipelineSetSeparableShaders(GLProgramPipelineRef pipeline, GLSeparableShaderProgramRef vertexShader, GLSeparableShaderProgramRef fragmentShader);
 
 	void VertexArraySetAttribFormats(GLVertexArrayRef vao, const std::vector<AttribFormat>& attribFormats);
 	void VertexArraySetVertexBuffer(GLVertexArrayRef vao, GLBufferRef vbo, size_t vertexSize);
@@ -96,7 +96,13 @@ public:
 	//-------------------------------------------------------------------------
 	// Validation Resource
 	//-------------------------------------------------------------------------
-	inline bool IsValid(GLProgramObjectRef resource) const noexcept { return resource && resource->IsValid(); }
+	inline bool IsValid(GLSeparableShaderProgramRef resource) const noexcept { return resource && resource->IsValid(); }
+	inline bool IsValid(GLProgramPipelineRef resource) const noexcept { return resource && resource->IsValid(); }
+	inline bool IsValid(GLBufferRef resource) const noexcept { return resource && resource->IsValid(); }
+	inline bool IsValid(GLVertexArrayRef resource) const noexcept { return resource && resource->IsValid(); }
+	inline bool IsValid(GLGeometryRef resource) const noexcept { return resource && IsValid(resource->vao); }
+	inline bool IsValid(GLTextureRef resource) const noexcept { return resource && resource->IsValid(); }
+	inline bool IsValid(GLFramebufferRef resource) const noexcept { return resource && resource->IsValid(); }
 
 private:
 	Systems& m_systems;

@@ -7,6 +7,7 @@
 
 #include <cassert>
 #include <string>
+#include <random>
 #include <ratio>
 #include <algorithm>
 #include <filesystem>

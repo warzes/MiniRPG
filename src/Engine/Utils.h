@@ -1,7 +1,7 @@
 #pragma once
 
 // TODO:
-std::string ReadTextFile(std::string_view filepath)
+inline std::string ReadTextFile(std::string_view filepath)
 {
 	if (!std::filesystem::exists(filepath.data()))
 	{

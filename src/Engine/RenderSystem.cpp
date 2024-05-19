@@ -3,6 +3,7 @@
 #include "WindowSystem.h"
 #include "LogSystem.h"
 #include "Utils.h"
+#include "CheckSupportOGLExtensions.h"
 //-----------------------------------------------------------------------------
 // TODO: добавить проверки ошибок ресурсов. сейчас только ассеты
 //-----------------------------------------------------------------------------
@@ -85,6 +86,9 @@ bool RenderSystem::Create(const RenderSystemCreateInfo& createInfo)
 	LogPrint("    > Version:  " + std::string((const char*)glGetString(GL_VERSION)));
 	LogPrint("    > GLSL:     " + std::string((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION)));
 
+	if (CheckSupportExtensions())
+		return false;
+
 	initializeExtensions(true);
 	initializeCapabilities(true);
 
@@ -123,30 +127,54 @@ void RenderSystem::BeginFrame()
 //-----------------------------------------------------------------------------
 void RenderSystem::EndFrame()
 {
-	//m_systems.window->SwapBuffers();
+	m_systems.window->SwapBuffers();
 }
 //-----------------------------------------------------------------------------
-GLProgramObjectRef RenderSystem::CreateProgramObject(GLenum type, std::string_view source)
+GLSeparableShaderProgramRef RenderSystem::CreateProgramObject(GLenum shaderType, std::string_view sourceCode)
 {
-	return std::make_shared<GLProgramObject>(m_systems, type, source);
+	auto resource = std::make_shared<GLSeparableShaderProgram>(shaderType, sourceCode);
+	if (IsValid(resource)) return resource;
+	else
+	{
+		m_systems.log->Error("GLSeparableShaderProgram not create");
+		return nullptr;
+	}
 }
 //-----------------------------------------------------------------------------
 GLProgramPipelineRef RenderSystem::CreateProgramPipeline()
 {
-	return std::make_shared<GLProgramPipeline>();
+	auto resource = std::make_shared<GLProgramPipeline>();
+	if (IsValid(resource)) return resource;
+	else
+	{
+		m_systems.log->Error("GLProgramPipeline not create");
+		return nullptr;
+	}
 }
 //-----------------------------------------------------------------------------
-GLProgramPipelineRef RenderSystem::CreateProgramPipeline(GLProgramObjectRef vertexShader, GLProgramObjectRef fragmentShader)
+GLProgramPipelineRef RenderSystem::CreateProgramPipeline(GLSeparableShaderProgramRef vertexShader, GLSeparableShaderProgramRef fragmentShader)
 {
-	GLProgramPipelineRef ret = CreateProgramPipeline();
-	ProgramPipelineSetProgramObjects(ret, vertexShader, fragmentShader);
-	return ret;
+	if (!IsValid(vertexShader))
+	{
+		m_systems.log->Error("vertexShader is null");
+		return nullptr;
+	}
+	if (!IsValid(fragmentShader))
+	{
+		m_systems.log->Error("fragmentShader is null");
+		return nullptr;
+	}
+
+	auto resource = CreateProgramPipeline();
+	if (resource)
+		ProgramPipelineSetSeparableShaders(resource, vertexShader, fragmentShader);
+	return resource;
 }
 //-----------------------------------------------------------------------------
 GLProgramPipelineRef RenderSystem::CreateProgramPipelineFromSources(std::string_view vertSource, std::string_view fragSource)
 {
-	GLProgramObjectRef vertexShader = CreateProgramObject(GL_VERTEX_SHADER, vertSource);
-	GLProgramObjectRef fragmentShader = CreateProgramObject(GL_FRAGMENT_SHADER, fragSource);
+	GLSeparableShaderProgramRef vertexShader = CreateProgramObject(GL_VERTEX_SHADER, vertSource);
+	GLSeparableShaderProgramRef fragmentShader = CreateProgramObject(GL_FRAGMENT_SHADER, fragSource);
 	return CreateProgramPipeline(vertexShader, fragmentShader);
 }
 //-----------------------------------------------------------------------------
@@ -159,13 +187,19 @@ GLProgramPipelineRef RenderSystem::CreateProgramPipelineFromFiles(std::string_vi
 //-----------------------------------------------------------------------------
 GLVertexArrayRef RenderSystem::CreateVertexArray()
 {
-	return std::make_shared<GLVertexArray>();
+	auto resource = std::make_shared<GLVertexArray>();
+	if (IsValid(resource)) return resource;
+	else
+	{
+		m_systems.log->Error("GLVertexArray not create");
+		return nullptr;
+	}
 }
 //-----------------------------------------------------------------------------
 GLVertexArrayRef RenderSystem::CreateVertexArray(const std::vector<AttribFormat>& attribFormats)
 {
-	GLVertexArrayRef resource = std::make_shared<GLVertexArray>();
-	VertexArraySetAttribFormats(resource, attribFormats);
+	auto resource = CreateVertexArray();
+	if (resource) VertexArraySetAttribFormats(resource, attribFormats);
 	return resource;
 }
 //-----------------------------------------------------------------------------
@@ -176,20 +210,28 @@ GLVertexArrayRef RenderSystem::CreateVertexArray(GLBufferRef vbo, size_t vertexS
 //-----------------------------------------------------------------------------
 GLVertexArrayRef RenderSystem::CreateVertexArray(GLBufferRef vbo, size_t vertexSize, GLBufferRef ibo, const std::vector<AttribFormat>& attribFormats)
 {
-	GLVertexArrayRef vao = CreateVertexArray(attribFormats);
-	if (vbo && *vbo && vertexSize) VertexArraySetVertexBuffer(vao, vbo, vertexSize);
-	if (ibo && *ibo) VertexArraySetIndexBuffer(vao, ibo);
-	return vao;
+	auto resource = CreateVertexArray(attribFormats);
+	if (!IsValid(resource)) return nullptr;
+	if (IsValid(vbo) && vertexSize) VertexArraySetVertexBuffer(resource, vbo, vertexSize);
+	if (IsValid(ibo)) VertexArraySetIndexBuffer(resource, ibo);
+	return resource;
 }
 //-----------------------------------------------------------------------------
 GLTextureRef RenderSystem::CreateTexture2D()
 {
-	return std::make_shared<GLTexture>(GL_TEXTURE_2D);
+	auto resource = std::make_shared<GLTexture>(GL_TEXTURE_2D);
+	if (IsValid(resource)) return resource;
+	else
+	{
+		m_systems.log->Error("GLTexture(GL_TEXTURE_2D) not create");
+		return nullptr;
+	}
 }
 //-----------------------------------------------------------------------------
 GLTextureRef RenderSystem::CreateTexture2D(GLenum internalFormat, GLenum format, GLsizei width, GLsizei height, void* data, GLenum filter, GLenum repeat, bool generateMipMaps)
 {
-	GLTextureRef texture = CreateTexture2D();
+	auto texture = CreateTexture2D();
+	if (!IsValid(texture)) return nullptr;
 
 	int levels = 1;
 	if (generateMipMaps)
@@ -247,14 +289,20 @@ GLTextureRef RenderSystem::CreateTexture2DFromFile(std::string_view filepath, in
 		}
 		}();
 
-	const auto tex = CreateTexture2D(in, ex, x, y, data, GL_LINEAR, GL_REPEAT, generateMipMaps);
+	auto resource = CreateTexture2D(in, ex, x, y, data, GL_LINEAR, GL_REPEAT, generateMipMaps);
 	stbi_image_free(data);
-	return tex;
+	return resource;
 }
 //-----------------------------------------------------------------------------
 GLTextureRef RenderSystem::CreateTextureCube()
 {
-	return std::make_shared<GLTexture>(GL_TEXTURE_CUBE_MAP);
+	auto resource = std::make_shared<GLTexture>(GL_TEXTURE_CUBE_MAP);
+	if (IsValid(resource)) return resource;
+	else
+	{
+		m_systems.log->Error("GLTexture(GL_TEXTURE_CUBE_MAP) not create");
+		return nullptr;
+	}
 }
 //-----------------------------------------------------------------------------
 GLTextureRef RenderSystem::CreateTextureCubeFromFile(std::array<std::string_view, 6> const& filepath, int comp)
@@ -276,30 +324,53 @@ GLTextureRef RenderSystem::CreateTextureCubeFromFile(std::array<std::string_view
 	for (auto i = 0; i < 6; i++)
 		faces[i] = stbi_load(filepath[i].data(), &x, &y, &c, comp);
 
-	const auto tex = CreateTextureCube(in, ex, x, y, faces);
+	auto resource = CreateTextureCube(in, ex, x, y, faces);
 	for (auto face : faces)
 		stbi_image_free(face);
 
-	return tex;
+	return resource;
 }
 //-----------------------------------------------------------------------------
 GLFramebufferRef RenderSystem::CreateFramebuffer()
 {
-	return std::make_shared<GLFramebuffer>();
+	auto resource = std::make_shared<GLFramebuffer>();
+	if (IsValid(resource)) return resource;
+	else
+	{
+		m_systems.log->Error("GLFramebuffer not create");
+		return nullptr;
+	}
 }
 //-----------------------------------------------------------------------------
 GLFramebufferRef RenderSystem::CreateFramebuffer(const std::vector<GLTextureRef>& cols, GLTextureRef depth)
 {
-	GLFramebufferRef fbo = CreateFramebuffer();
-	FramebufferSetTextures(fbo, cols, depth);
-	return fbo;
+	auto resource = CreateFramebuffer();
+	if (IsValid(resource))
+		FramebufferSetTextures(resource, cols, depth);
+	return resource;
 }
 //-----------------------------------------------------------------------------
-void RenderSystem::ProgramPipelineSetProgramObjects(GLProgramPipelineRef pipeline, GLProgramObjectRef vertexShader, GLProgramObjectRef fragmentShader)
+void RenderSystem::ProgramPipelineSetSeparableShaders(GLProgramPipelineRef pipeline, GLSeparableShaderProgramRef vertexShader, GLSeparableShaderProgramRef fragmentShader)
 {
-	assert(pipeline && *pipeline);
-	assert(vertexShader && *vertexShader);
-	assert(fragmentShader && *fragmentShader);
+	assert(IsValid(pipeline));
+	assert(IsValid(vertexShader));
+	assert(IsValid(fragmentShader));
+
+	if (!IsValid(pipeline))
+	{
+		m_systems.log->Error("GLProgramPipelineRef is null");
+		return;
+	}
+	if (!IsValid(vertexShader))
+	{
+		m_systems.log->Error("GLSeparableShaderProgramRef is null");
+		return;
+	}
+	if (!IsValid(fragmentShader))
+	{
+		m_systems.log->Error("GLSeparableShaderProgramRef is null");
+		return;
+	}
 
 	glUseProgramStages(*pipeline, GL_VERTEX_SHADER_BIT, *vertexShader);
 	glUseProgramStages(*pipeline, GL_FRAGMENT_SHADER_BIT, *fragmentShader);
@@ -310,7 +381,8 @@ void RenderSystem::ProgramPipelineSetProgramObjects(GLProgramPipelineRef pipelin
 //-----------------------------------------------------------------------------
 void RenderSystem::VertexArraySetAttribFormats(GLVertexArrayRef vao, const std::vector<AttribFormat>& attribFormats)
 {
-	assert(vao && *vao);
+	assert(IsValid(vao));
+	if (!IsValid(vao)) return;
 	for (auto const& format : attribFormats)
 	{
 		glEnableVertexArrayAttrib(*vao, format.attribIndex);
@@ -321,28 +393,33 @@ void RenderSystem::VertexArraySetAttribFormats(GLVertexArrayRef vao, const std::
 //-----------------------------------------------------------------------------
 void RenderSystem::VertexArraySetVertexBuffer(GLVertexArrayRef vao, GLBufferRef vbo, size_t vertexSize)
 {
-	assert(vao && *vao);
-	assert(vbo && *vbo);
-	glVertexArrayVertexBuffer(*vao, 0, *vbo, 0, vertexSize);
+	assert(IsValid(vao));
+	assert(IsValid(vbo));
+	if (IsValid(vao) && IsValid(vbo))
+		glVertexArrayVertexBuffer(*vao, 0, *vbo, 0, vertexSize);
 }
 //-----------------------------------------------------------------------------
 void RenderSystem::VertexArraySetIndexBuffer(GLVertexArrayRef vao, GLBufferRef ibo)
 {
-	assert(vao && *vao);
-	assert(ibo && *ibo);
+	assert(IsValid(vao));
+	assert(IsValid(ibo));
+	if (IsValid(vao) && IsValid(ibo))
 	glVertexArrayElementBuffer(*vao, *ibo);
 }
 //-----------------------------------------------------------------------------
 void RenderSystem::FramebufferSetTextures(GLFramebufferRef fbo, const std::vector<GLTextureRef>& cols, GLTextureRef depth)
 {
+	assert(IsValid(fbo));
+	if (!IsValid(fbo)) return;
+
 	for (auto i = 0; i < cols.size(); i++)
 		glNamedFramebufferTexture(*fbo, GL_COLOR_ATTACHMENT0 + i, *cols[i], 0);
 
-	std::array<GLenum, 32> draw_buffs;
+	std::array<GLenum, 32> drawBuffs{};
 	for (GLenum i = 0; i < cols.size(); i++)
-		draw_buffs[i] = GL_COLOR_ATTACHMENT0 + i;
+		drawBuffs[i] = GL_COLOR_ATTACHMENT0 + i;
 
-	glNamedFramebufferDrawBuffers(*fbo, cols.size(), draw_buffs.data());
+	glNamedFramebufferDrawBuffers(*fbo, cols.size(), drawBuffs.data());
 
 	if (depth)
 		glNamedFramebufferTexture(*fbo, GL_DEPTH_ATTACHMENT, *depth, 0);
@@ -386,7 +463,8 @@ void RenderSystem::MainFrameBuffer()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 //-----------------------------------------------------------------------------
-void RenderSystem::BlitFrameBuffer(GLFramebufferRef readFramebuffer, GLFramebufferRef drawFramebuffer, 
+void RenderSystem::BlitFrameBuffer(
+	GLFramebufferRef readFramebuffer, GLFramebufferRef drawFramebuffer, 
 	GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, 
 	GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, 
 	GLbitfield mask, GLenum filter)

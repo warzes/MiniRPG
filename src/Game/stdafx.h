@@ -32,10 +32,16 @@
 #endif
 
 #include "Engine/Core.h"
+#include "Engine/Clock.h"
 #include "Engine/EngineString.h"
+#include "Engine/EnumArray.h"
+#include "Engine/FileInputStream.h"
+#include "Engine/GenerateUUID.h"
 #include "Engine/Image.h"
 #include "Engine/LogSystem.h"
+#include "Engine/MemoryInputStream.h"
 #include "Engine/Systems.h"
+#include "Engine/Utils.h"
 
 #include "Engine/Keyboard.h"
 #include "Engine/Mouse.h"

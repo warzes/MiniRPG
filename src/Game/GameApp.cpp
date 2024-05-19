@@ -302,6 +302,9 @@ void GameApp::Run()
 	constexpr auto uniform_blur_except = 5;
 	constexpr auto uniform_emissive_strength = 0;
 
+	GLint iLocation = glGetUniformLocation(*ppGBuffer->GetVertexShader(), "mvp_curr");
+
+
 	render.SetUniform(ppGBuffer->GetVertexShader(), uniform_projection, m_perspective);
 
 	std::vector<scene_object_t> objects = {
@@ -513,7 +516,6 @@ void GameApp::Run()
 				GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 		render.EndFrame();
-		window.SwapBuffers();
 	}
 
 	cubeGeom.reset();
