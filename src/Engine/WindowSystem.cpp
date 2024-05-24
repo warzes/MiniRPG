@@ -11,6 +11,8 @@
 //-----------------------------------------------------------------------------
 constexpr const wchar_t* WndClassName = L"MainWindowMiniEngine";
 //-----------------------------------------------------------------------------
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+//-----------------------------------------------------------------------------
 struct WindowImpl final
 {
 	WindowImpl(WindowSystem* wnd) : window(wnd) {}
@@ -491,6 +493,9 @@ void WindowSystem::filterEvent(const Event& event)
 LRESULT WindowSystem::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if ((message == WM_SYSCOMMAND) && (wParam == SC_KEYMENU))
+		return 0;
+
+	if (ImGui_ImplWin32_WndProcHandler(m_handle, message, wParam, lParam))
 		return 0;
 
 	switch (message)

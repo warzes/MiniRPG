@@ -1,8 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "Systems.h"
 #include "Image.h"
 #include "RenderResources.h"
+
+// TODO: сейчас сеттеры пишутся так ResourceSetMode. Может переделать так: SetMode?
 
 constexpr int MaxBindingTextures = 16;
 
@@ -27,12 +29,14 @@ public:
 	// Create Resource
 	//-------------------------------------------------------------------------
 
-	GLSeparableShaderProgramRef CreateProgramObject(GLenum shaderType, std::string_view sourceCode);
+	GLSeparableShaderProgramRef CreateSeparableShaderProgram(GLenum shaderType, std::string_view sourceCode);
+
 	GLProgramPipelineRef CreateProgramPipeline();
 	GLProgramPipelineRef CreateProgramPipeline(GLSeparableShaderProgramRef vertexShader, GLSeparableShaderProgramRef fragmentShader);
 	GLProgramPipelineRef CreateProgramPipelineFromSources(std::string_view vertSource, std::string_view fragSource);
 	GLProgramPipelineRef CreateProgramPipelineFromFiles(std::string_view vertFilepath, std::string_view fragFilepath);
 
+	GLBufferRef CreateBuffer();
 	template<typename T>
 	GLBufferRef CreateBuffer(const std::vector<T>& buff, GLenum flags = GL_DYNAMIC_STORAGE_BIT);
 
@@ -67,6 +71,17 @@ public:
 	GLFramebufferRef CreateFramebuffer(const std::vector<GLTextureRef>& cols, GLTextureRef depth = nullptr);
 
 	//-------------------------------------------------------------------------
+	// Validation Resource
+	//-------------------------------------------------------------------------
+	inline bool IsValid(GLSeparableShaderProgramRef resource) const noexcept { return resource && resource->IsValid(); }
+	inline bool IsValid(GLProgramPipelineRef resource) const noexcept { return resource && resource->IsValid(); }
+	inline bool IsValid(GLBufferRef resource) const noexcept { return resource && resource->IsValid(); }
+	inline bool IsValid(GLVertexArrayRef resource) const noexcept { return resource && resource->IsValid(); }
+	inline bool IsValid(GLGeometryRef resource) const noexcept { return resource && IsValid(resource->vao); }
+	inline bool IsValid(GLTextureRef resource) const noexcept { return resource && resource->IsValid(); }
+	inline bool IsValid(GLFramebufferRef resource) const noexcept { return resource && resource->IsValid(); }
+
+	//-------------------------------------------------------------------------
 	// Modify Resource
 	//-------------------------------------------------------------------------
 	template <typename T>
@@ -74,8 +89,30 @@ public:
 
 	void ProgramPipelineSetSeparableShaders(GLProgramPipelineRef pipeline, GLSeparableShaderProgramRef vertexShader, GLSeparableShaderProgramRef fragmentShader);
 
+	// внимание: можно вызвать только один раз и только для пустого буфера (проверить), также нельзя использовать BufferSetData(). в будущем сделать проверку. переделать этот комментарий под общий для трех функций
+	template<typename T>
+	void SetDataImmutable(GLBufferRef buffer, const std::vector<T>& buff, GLenum flags = GL_DYNAMIC_STORAGE_BIT);
+	template<typename T>
+	void SetData(GLBufferRef buffer, const std::vector<T>& buff, GLenum usage = GL_DYNAMIC_DRAW);
+	template<typename T>
+	void SetSubData(GLBufferRef buffer, GLintptr offset, const std::vector<T>& buff);
+
+	void ClearSubData(GLBufferRef buffer, const GLenum internalFormat, const GLintptr offset, const GLsizeiptr size, const GLenum format, const GLenum data_type, const void* data = nullptr);
+	void ClearData(GLBufferRef buffer, const GLenum internalFormat, const GLenum format, const GLenum data_type, const void* data = nullptr);
+
+	[[nodiscard]] void* MapRange(GLBufferRef buffer, const GLintptr offset, const GLsizeiptr size, const GLbitfield accessFlags = GL_MAP_READ_BIT | GL_MAP_WRITE_BIT) const;
+	[[nodiscard]] void* Map(GLBufferRef buffer, const GLenum access = GL_READ_WRITE) const;
+	void FlushMappedRange(GLBufferRef buffer, const GLintptr offset, const GLsizeiptr size) const;
+	void Unmap(GLBufferRef buffer) const;
+
+	void InvalidateSubData(GLBufferRef buffer, const GLintptr offset, const GLsizeiptr size) const;
+	void Invalidate(GLBufferRef buffer) const;
+
+	void CopySubData(GLBufferRef source, GLBufferRef dest, const GLintptr sourceOffset, const GLintptr offset, const GLsizeiptr size) const;
+
 	void VertexArraySetAttribFormats(GLVertexArrayRef vao, const std::vector<AttribFormat>& attribFormats);
 	void VertexArraySetVertexBuffer(GLVertexArrayRef vao, GLBufferRef vbo, size_t vertexSize);
+	void VertexArraySetVertexBuffer(GLVertexArrayRef vao, const GLuint bindingIndex, GLBufferRef vbo, const GLintptr offset = 0, const GLsizei stride = 1);
 	void VertexArraySetIndexBuffer(GLVertexArrayRef vao, GLBufferRef ibo);
 
 	void FramebufferSetTextures(GLFramebufferRef framebuffer, const std::vector<GLTextureRef>& cols, GLTextureRef depth = nullptr);
@@ -92,17 +129,6 @@ public:
 
 	void MainFrameBuffer();
 	void BlitFrameBuffer(GLFramebufferRef readFramebuffer, GLFramebufferRef drawFramebuffer, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
-
-	//-------------------------------------------------------------------------
-	// Validation Resource
-	//-------------------------------------------------------------------------
-	inline bool IsValid(GLSeparableShaderProgramRef resource) const noexcept { return resource && resource->IsValid(); }
-	inline bool IsValid(GLProgramPipelineRef resource) const noexcept { return resource && resource->IsValid(); }
-	inline bool IsValid(GLBufferRef resource) const noexcept { return resource && resource->IsValid(); }
-	inline bool IsValid(GLVertexArrayRef resource) const noexcept { return resource && resource->IsValid(); }
-	inline bool IsValid(GLGeometryRef resource) const noexcept { return resource && IsValid(resource->vao); }
-	inline bool IsValid(GLTextureRef resource) const noexcept { return resource && resource->IsValid(); }
-	inline bool IsValid(GLFramebufferRef resource) const noexcept { return resource && resource->IsValid(); }
 
 private:
 	Systems& m_systems;

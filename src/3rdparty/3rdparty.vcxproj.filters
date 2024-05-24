@@ -28,6 +28,18 @@
     <Filter Include="glad">
       <UniqueIdentifier>{01b6e3f7-eebf-406e-9a00-d8df38879b41}</UniqueIdentifier>
     </Filter>
+    <Filter Include="miniaudio">
+      <UniqueIdentifier>{4b0bfa0a-c507-4c80-8fa0-a819856c419e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="minimp3">
+      <UniqueIdentifier>{d6f1ba4f-ed51-415a-84b8-771ffcae93d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FLAC">
+      <UniqueIdentifier>{c3c3bd85-d453-4ab2-b44f-adc981cd4769}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{89f2960d-a9a1-4b7e-8207-11687e4a92ff}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="glm\common.hpp">
@@ -937,6 +949,71 @@
     <ClInclude Include="glad\wgl.h">
       <Filter>glad</Filter>
     </ClInclude>
+    <ClInclude Include="miniaudio.h">
+      <Filter>miniaudio</Filter>
+    </ClInclude>
+    <ClInclude Include="minimp3\minimp3.h">
+      <Filter>minimp3</Filter>
+    </ClInclude>
+    <ClInclude Include="minimp3\minimp3_ex.h">
+      <Filter>minimp3</Filter>
+    </ClInclude>
+    <ClInclude Include="FLAC\all.h">
+      <Filter>FLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="FLAC\assert.h">
+      <Filter>FLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="FLAC\callback.h">
+      <Filter>FLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="FLAC\export.h">
+      <Filter>FLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="FLAC\format.h">
+      <Filter>FLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="FLAC\metadata.h">
+      <Filter>FLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="FLAC\ordinals.h">
+      <Filter>FLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="FLAC\stream_decoder.h">
+      <Filter>FLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="FLAC\stream_encoder.h">
+      <Filter>FLAC</Filter>
+    </ClInclude>
+    <ClInclude Include="tiny_gltf.h" />
+    <ClInclude Include="json.h" />
+    <ClInclude Include="imgui\imgui_impl_win32.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_internal.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_rectpack.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_textedit.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_truetype.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imconfig.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_opengl3.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glm\detail\glm.cpp">
@@ -953,6 +1030,31 @@
     </ClCompile>
     <ClCompile Include="glad\wgl.c">
       <Filter>glad</Filter>
+    </ClCompile>
+    <ClCompile Include="Miniaudio.cpp">
+      <Filter>miniaudio</Filter>
+    </ClCompile>
+    <ClCompile Include="minimp3_ex.cpp">
+      <Filter>minimp3</Filter>
+    </ClCompile>
+    <ClCompile Include="tiny_gltf.cpp" />
+    <ClCompile Include="imgui\imgui_impl_win32.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_tables.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_widgets.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_draw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_impl_opengl3.cpp">
+      <Filter>imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

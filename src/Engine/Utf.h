@@ -50,7 +50,7 @@ public:
 	// Convert an ANSI characters range to UTF-8
 	// The current global locale will be used by default, unless you pass a custom one in the \a locale parameter.
 	template <typename In, typename Out>
-	static Out fromAnsi(In begin, In end, Out output, const std::locale& locale = std::locale());
+	static Out fromAnsi(In begin, In end, Out output, const std::locale& locale = {});
 
 	// Convert a wide characters range to UTF-8
 	template <typename In, typename Out>
@@ -63,7 +63,7 @@ public:
 	// Convert an UTF-8 characters range to ANSI characters
 	// The current global locale will be used by default, unless you pass a custom one in the \a locale parameter.
 	template <typename In, typename Out>
-	static Out toAnsi(In begin, In end, Out output, char replacement = 0, const std::locale& locale = std::locale());
+	static Out toAnsi(In begin, In end, Out output, char replacement = 0, const std::locale& locale = {});
 
 	// Convert an UTF-8 characters range to wide characters
 	template <typename In, typename Out>
@@ -74,7 +74,7 @@ public:
 	static Out toLatin1(In begin, In end, Out output, char replacement = 0);
 
 	// Convert a UTF-8 characters range to UTF-8
-	/// This functions does nothing more than a direct copy; it is defined only to provide the same interface as other specializations of the sf::Utf<> template, and allow generic code to be written on top of it.
+	/// This functions does nothing more than a direct copy; it is defined only to provide the same interface as other specializations of the Utf<> template, and allow generic code to be written on top of it.
 	template <typename In, typename Out>
 	static Out toUtf8(In begin, In end, Out output);
 
@@ -115,7 +115,7 @@ public:
 	/// Convert an ANSI characters range to UTF-16
 	// The current global locale will be used by default, unless you pass a custom one in the \a locale parameter.
 	template <typename In, typename Out>
-	static Out fromAnsi(In begin, In end, Out output, const std::locale& locale = std::locale());
+	static Out fromAnsi(In begin, In end, Out output, const std::locale& locale = {});
 
 	// Convert a wide characters range to UTF-16
 	template <typename In, typename Out>
@@ -128,7 +128,7 @@ public:
 	// Convert an UTF-16 characters range to ANSI characters
 	// The current global locale will be used by default, unless you pass a custom one in the \a locale parameter.
 	template <typename In, typename Out>
-	static Out toAnsi(In begin, In end, Out output, char replacement = 0, const std::locale& locale = std::locale());
+	static Out toAnsi(In begin, In end, Out output, char replacement = 0, const std::locale& locale = {});
 
 	// Convert an UTF-16 characters range to wide characters
 	template <typename In, typename Out>
@@ -143,7 +143,7 @@ public:
 	static Out toUtf8(In begin, In end, Out output);
 
 	// Convert a UTF-16 characters range to UTF-16
-	/// This functions does nothing more than a direct copy; it is defined only to provide the same interface as other specializations of the sf::Utf<> template, and allow generic code to be written on top of it.
+	/// This functions does nothing more than a direct copy; it is defined only to provide the same interface as other specializations of the Utf<> template, and allow generic code to be written on top of it.
 	template <typename In, typename Out>
 	static Out toUtf16(In begin, In end, Out output);
 
@@ -180,7 +180,7 @@ public:
 	// Convert an ANSI characters range to UTF-32
 	// The current global locale will be used by default, unless you pass a custom one in the \a locale parameter.
 	template <typename In, typename Out>
-	static Out fromAnsi(In begin, In end, Out output, const std::locale& locale = std::locale());
+	static Out fromAnsi(In begin, In end, Out output, const std::locale& locale = {});
 
 	// Convert a wide characters range to UTF-32
 	template <typename In, typename Out>
@@ -193,7 +193,7 @@ public:
 	// Convert an UTF-32 characters range to ANSI characters
 	// The current global locale will be used by default, unless you pass a custom one in the \a locale parameter.
 	template <typename In, typename Out>
-	static Out toAnsi(In begin, In end, Out output, char replacement = 0, const std::locale& locale = std::locale());
+	static Out toAnsi(In begin, In end, Out output, char replacement = 0, const std::locale& locale = {});
 
 	// Convert an UTF-32 characters range to wide characters
 	template <typename In, typename Out>
@@ -219,7 +219,7 @@ public:
 	// Decode a single ANSI character to UTF-32
 	/// This function does not exist in other specializations of Utf<>, it is defined for convenience (it is used by several other conversion functions).
 	template <typename In>
-	static std::uint32_t decodeAnsi(In input, const std::locale& locale = std::locale());
+	static std::uint32_t decodeAnsi(In input, const std::locale& locale = {});
 
 	// Decode a single wide character to UTF-32
 	/// This function does not exist in other specializations of Utf<>, it is defined for convenience (it is used by several other conversion functions).
@@ -229,7 +229,7 @@ public:
 	// Encode a single UTF-32 character to ANSI
 	// This function does not exist in other specializations of Utf<>, it is defined for convenience (it is used by several other conversion functions).
 	template <typename Out>
-	static Out encodeAnsi(std::uint32_t codepoint, Out output, char replacement = 0, const std::locale& locale = std::locale());
+	static Out encodeAnsi(std::uint32_t codepoint, Out output, char replacement = 0, const std::locale& locale = {});
 
 	// Encode a single UTF-32 character to wide
 	// This function does not exist in other specializations of Utf<>, it is defined for convenience (it is used by several other conversion functions).
@@ -247,7 +247,7 @@ In Utf<8>::decode(In begin, In end, std::uint32_t& output, std::uint32_t replace
 {
 	// clang-format off
 	// Some useful precomputed data
-	static constexpr int trailing[256] =
+	static constexpr std::array<std::uint8_t, 256> trailing =
 	{
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -259,14 +259,14 @@ In Utf<8>::decode(In begin, In end, std::uint32_t& output, std::uint32_t replace
 		2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5
 	};
 
-	static constexpr std::uint32_t offsets[6] =
+	static constexpr std::array<std::uint32_t, 6> offsets =
 	{
 		0x00000000, 0x00003080, 0x000E2080, 0x03C82080, 0xFA082080, 0x82082080
 	};
 	// clang-format on
 
 	// decode the character
-	const int trailingBytes = trailing[static_cast<std::uint8_t>(*begin)];
+	const auto trailingBytes = trailing[static_cast<std::uint8_t>(*begin)];
 	if (trailingBytes < std::distance(begin, end))
 	{
 		output = 0;
@@ -299,7 +299,7 @@ template <typename Out>
 Out Utf<8>::encode(std::uint32_t input, Out output, std::uint8_t replacement)
 {
 	// Some useful precomputed data
-	static constexpr std::uint8_t firstBytes[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
+	static constexpr std::array<std::uint8_t, 7> firstBytes = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
 
 	// encode the character
 	if ((input > 0x0010FFFF) || ((input >= 0xD800) && (input <= 0xDBFF)))
@@ -323,7 +323,7 @@ Out Utf<8>::encode(std::uint32_t input, Out output, std::uint8_t replacement)
 		// clang-format on
 
 		// Extract the bytes to write
-		std::byte bytes[4];
+		std::array<std::byte, 4> bytes{};
 
 		// clang-format off
 		switch (bytestoWrite)
@@ -336,7 +336,7 @@ Out Utf<8>::encode(std::uint32_t input, Out output, std::uint8_t replacement)
 		// clang-format on
 
 		// Add them to the output
-		output = priv::copy(bytes, bytes + bytestoWrite, output);
+		output = priv::copy(bytes.data(), bytes.data() + bytestoWrite, output);
 	}
 
 	return output;

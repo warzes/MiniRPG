@@ -102,7 +102,7 @@ private:
 template <typename T>
 Event::Event(const T& t)
 {
-	static_assert(isEventType<T>, "T must be a subtype of sf::Event");
+	static_assert(isEventType<T>, "T must be a subtype of Event");
 	if constexpr (isEventType<T>)
 		m_data = t;
 }
@@ -110,7 +110,7 @@ Event::Event(const T& t)
 template <typename T>
 bool Event::Is() const
 {
-	static_assert(isEventType<T>, "T must be a subtype of sf::Event");
+	static_assert(isEventType<T>, "T must be a subtype of Event");
 	if constexpr (isEventType<T>)
 		return std::holds_alternative<T>(m_data);
 }
@@ -118,7 +118,7 @@ bool Event::Is() const
 template <typename T>
 const T* Event::GetIf() const
 {
-	static_assert(isEventType<T>, "T must be a subtype of sf::Event");
+	static_assert(isEventType<T>, "T must be a subtype of Event");
 	if constexpr (isEventType<T>)
 		return std::get_if<T>(&m_data);
 }

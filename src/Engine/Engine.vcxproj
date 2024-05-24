@@ -93,6 +93,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AudioDevice.cpp" />
+    <ClCompile Include="AudioResource.cpp" />
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="EngineApp.cpp" />
@@ -100,24 +102,50 @@
     <ClCompile Include="FileInputStream.cpp" />
     <ClCompile Include="GenerateUUID.cpp" />
     <ClCompile Include="Image.cpp" />
+    <ClCompile Include="InputSoundFile.cpp" />
     <ClCompile Include="Keyboard.cpp" />
+    <ClCompile Include="Listener.cpp" />
     <ClCompile Include="LogSystem.cpp" />
     <ClCompile Include="MemoryInputStream.cpp" />
+    <ClCompile Include="MiniaudioUtils.cpp" />
     <ClCompile Include="Mouse.cpp" />
+    <ClCompile Include="Music.cpp" />
+    <ClCompile Include="OutputSoundFile.cpp" />
     <ClCompile Include="RenderResources.cpp" />
     <ClCompile Include="RenderCamera.cpp" />
     <ClCompile Include="RenderCore.cpp" />
     <ClCompile Include="RenderSystem.cpp" />
     <ClCompile Include="Sleep.cpp" />
+    <ClCompile Include="Sound.cpp" />
+    <ClCompile Include="SoundBuffer.cpp" />
+    <ClCompile Include="SoundBufferRecorder.cpp" />
+    <ClCompile Include="SoundFileFactory.cpp" />
+    <ClCompile Include="SoundFileReaderFlac.cpp" />
+    <ClCompile Include="SoundFileReaderMp3.cpp" />
+    <ClCompile Include="SoundFileReaderOgg.cpp" />
+    <ClCompile Include="SoundFileReaderWav.cpp" />
+    <ClCompile Include="SoundFileWriterFlac.cpp" />
+    <ClCompile Include="SoundFileWriterOgg.cpp" />
+    <ClCompile Include="SoundFileWriterWav.cpp" />
+    <ClCompile Include="SoundRecorder.cpp" />
+    <ClCompile Include="SoundSource.cpp" />
+    <ClCompile Include="SoundStream.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TempError.cpp" />
+    <ClCompile Include="Vector2.cpp" />
+    <ClCompile Include="Vector3.cpp" />
     <ClCompile Include="WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Angle.h" />
+    <ClInclude Include="AudioDevice.h" />
+    <ClInclude Include="AudioResource.h" />
     <ClInclude Include="CheckSupportOGLExtensions.h" />
     <ClInclude Include="Clock.h" />
+    <ClInclude Include="Color.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="DebugNew.h" />
     <ClInclude Include="EngineApp.h" />
@@ -127,27 +155,59 @@
     <ClInclude Include="FileInputStream.h" />
     <ClInclude Include="GenerateUUID.h" />
     <ClInclude Include="Image.h" />
+    <ClInclude Include="InputSoundFile.h" />
     <ClInclude Include="InputStream.h" />
     <ClInclude Include="Keyboard.h" />
+    <ClInclude Include="Listener.h" />
     <ClInclude Include="LogSystem.h" />
     <ClInclude Include="MemoryInputStream.h" />
+    <ClInclude Include="MiniaudioUtils.h" />
     <ClInclude Include="Mouse.h" />
+    <ClInclude Include="Music.h" />
+    <ClInclude Include="OutputSoundFile.h" />
+    <ClInclude Include="Rect.h" />
     <ClInclude Include="RenderResources.h" />
     <ClInclude Include="PlatformEvent.h" />
     <ClInclude Include="RenderCamera.h" />
     <ClInclude Include="RenderCore.h" />
     <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="Sleep.h" />
+    <ClInclude Include="Sound.h" />
+    <ClInclude Include="SoundBuffer.h" />
+    <ClInclude Include="SoundBufferRecorder.h" />
+    <ClInclude Include="SoundChannel.h" />
+    <ClInclude Include="SoundFileFactory.h" />
+    <ClInclude Include="SoundFileReader.h" />
+    <ClInclude Include="SoundFileReaderFlac.h" />
+    <ClInclude Include="SoundFileReaderMp3.h" />
+    <ClInclude Include="SoundFileReaderOgg.h" />
+    <ClInclude Include="SoundFileReaderWav.h" />
+    <ClInclude Include="SoundFileWriter.h" />
+    <ClInclude Include="SoundFileWriterFlac.h" />
+    <ClInclude Include="SoundFileWriterOgg.h" />
+    <ClInclude Include="SoundFileWriterWav.h" />
+    <ClInclude Include="SoundRecorder.h" />
+    <ClInclude Include="SoundSource.h" />
+    <ClInclude Include="SoundStream.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Systems.h" />
+    <ClInclude Include="TempError.h" />
     <ClInclude Include="TemporaryWindow.h" />
     <ClInclude Include="Utf.h" />
     <ClInclude Include="Utils.h" />
+    <ClInclude Include="Vector2.h" />
+    <ClInclude Include="Vector3.h" />
     <ClInclude Include="WindowsInclude.h" />
     <ClInclude Include="WindowSystem.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Angle.inl" />
+    <None Include="Color.inl" />
+    <None Include="Rect.inl" />
     <None Include="RenderSystem.inl" />
+    <None Include="SoundFileFactory.inl" />
+    <None Include="Vector2.inl" />
+    <None Include="Vector3.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

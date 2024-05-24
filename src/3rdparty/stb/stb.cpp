@@ -8,8 +8,9 @@
 #include "stb_herringbone_wang_tile.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-//#define STB_IMAGE_WRITE_IMPLEMENTATION
-//#include "stb_image_write.h"
+#define __STDC_LIB_EXT1__
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 //#define STB_INCLUDE_IMPLEMENTATION
 //#include "stb_include.h"
 #define STB_PERLIN_IMPLEMENTATION

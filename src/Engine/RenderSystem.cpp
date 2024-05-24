@@ -86,7 +86,7 @@ bool RenderSystem::Create(const RenderSystemCreateInfo& createInfo)
 	LogPrint("    > Version:  " + std::string((const char*)glGetString(GL_VERSION)));
 	LogPrint("    > GLSL:     " + std::string((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION)));
 
-	if (CheckSupportExtensions())
+	if (!CheckSupportExtensions())
 		return false;
 
 	initializeExtensions(true);
@@ -95,16 +95,16 @@ bool RenderSystem::Create(const RenderSystemCreateInfo& createInfo)
 	// не использовать Bind(state) так как дефолтные значения из кеша могут не соответствовать установкам.
 
 	// set default depth state
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	glDepthMask(GL_TRUE);
+	//glEnable(GL_DEPTH_TEST);
+	//glDepthFunc(GL_LESS);
+	//glDepthMask(GL_TRUE);
 
-	// set defautl stensil state
-	// TODO: проставить дефолтные значения StencilState
+	//// set defautl stensil state
+	//// TODO: проставить дефолтные значения StencilState
 
-	//glEnable(GL_CULL_FACE);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	////glEnable(GL_CULL_FACE);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glClearColor(createInfo.clearColor.x, createInfo.clearColor.y, createInfo.clearColor.z, 1.0f);
 
 	LogPrint("RenderSystem Create");
@@ -130,7 +130,7 @@ void RenderSystem::EndFrame()
 	m_systems.window->SwapBuffers();
 }
 //-----------------------------------------------------------------------------
-GLSeparableShaderProgramRef RenderSystem::CreateProgramObject(GLenum shaderType, std::string_view sourceCode)
+GLSeparableShaderProgramRef RenderSystem::CreateSeparableShaderProgram(GLenum shaderType, std::string_view sourceCode)
 {
 	auto resource = std::make_shared<GLSeparableShaderProgram>(shaderType, sourceCode);
 	if (IsValid(resource)) return resource;
@@ -173,8 +173,8 @@ GLProgramPipelineRef RenderSystem::CreateProgramPipeline(GLSeparableShaderProgra
 //-----------------------------------------------------------------------------
 GLProgramPipelineRef RenderSystem::CreateProgramPipelineFromSources(std::string_view vertSource, std::string_view fragSource)
 {
-	GLSeparableShaderProgramRef vertexShader = CreateProgramObject(GL_VERTEX_SHADER, vertSource);
-	GLSeparableShaderProgramRef fragmentShader = CreateProgramObject(GL_FRAGMENT_SHADER, fragSource);
+	GLSeparableShaderProgramRef vertexShader = CreateSeparableShaderProgram(GL_VERTEX_SHADER, vertSource);
+	GLSeparableShaderProgramRef fragmentShader = CreateSeparableShaderProgram(GL_FRAGMENT_SHADER, fragSource);
 	return CreateProgramPipeline(vertexShader, fragmentShader);
 }
 //-----------------------------------------------------------------------------
@@ -183,6 +183,17 @@ GLProgramPipelineRef RenderSystem::CreateProgramPipelineFromFiles(std::string_vi
 	const auto vertSource = ReadTextFile(vertFilepath);
 	const auto fragSource = ReadTextFile(fragFilepath);
 	return CreateProgramPipelineFromSources(vertSource, fragSource);
+}
+//-----------------------------------------------------------------------------
+GLBufferRef RenderSystem::CreateBuffer()
+{
+	auto resource = std::make_shared<GLBuffer>();
+	if (IsValid(resource)) return resource;
+	else
+	{
+		m_systems.log->Error("GLBuffer not create");
+		return nullptr;
+	}
 }
 //-----------------------------------------------------------------------------
 GLVertexArrayRef RenderSystem::CreateVertexArray()
@@ -379,6 +390,51 @@ void RenderSystem::ProgramPipelineSetSeparableShaders(GLProgramPipelineRef pipel
 	pipeline->m_fragmentShader = fragmentShader;
 }
 //-----------------------------------------------------------------------------
+void RenderSystem::ClearSubData(GLBufferRef buffer, const GLenum internalFormat, const GLintptr offset, const GLsizeiptr size, const GLenum format, const GLenum data_type, const void* data)
+{
+	glClearNamedBufferSubData(*buffer, internalFormat, offset, size, format, data_type, data);
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::ClearData(GLBufferRef buffer, const GLenum internalFormat, const GLenum format, const GLenum data_type, const void* data)
+{
+	glClearNamedBufferData(*buffer, internalFormat, format, data_type, data);
+}
+//-----------------------------------------------------------------------------
+void* RenderSystem::MapRange(GLBufferRef buffer, const GLintptr offset, const GLsizeiptr size, const GLbitfield accessFlags) const
+{
+	return glMapNamedBufferRange(*buffer, offset, size, accessFlags);
+}
+//-----------------------------------------------------------------------------
+void* RenderSystem::Map(GLBufferRef buffer, const GLenum access) const
+{
+	return glMapNamedBuffer(*buffer, access);
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::FlushMappedRange(GLBufferRef buffer, const GLintptr offset, const GLsizeiptr size) const
+{
+	glFlushMappedNamedBufferRange(*buffer, offset, size);
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::Unmap(GLBufferRef buffer) const
+{
+	glUnmapNamedBuffer(*buffer);
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::InvalidateSubData(GLBufferRef buffer, const GLintptr offset, const GLsizeiptr size) const
+{
+	glInvalidateBufferSubData(*buffer, offset, size);
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::Invalidate(GLBufferRef buffer) const
+{
+	glInvalidateBufferData(*buffer);
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::CopySubData(GLBufferRef source, GLBufferRef dest, const GLintptr sourceOffset, const GLintptr offset, const GLsizeiptr size) const
+{
+	glCopyNamedBufferSubData(*source, *dest, sourceOffset, offset, size);
+}
+//-----------------------------------------------------------------------------
 void RenderSystem::VertexArraySetAttribFormats(GLVertexArrayRef vao, const std::vector<AttribFormat>& attribFormats)
 {
 	assert(IsValid(vao));
@@ -393,10 +449,15 @@ void RenderSystem::VertexArraySetAttribFormats(GLVertexArrayRef vao, const std::
 //-----------------------------------------------------------------------------
 void RenderSystem::VertexArraySetVertexBuffer(GLVertexArrayRef vao, GLBufferRef vbo, size_t vertexSize)
 {
+	VertexArraySetVertexBuffer(vao, 0, vbo, 0, vertexSize);
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::VertexArraySetVertexBuffer(GLVertexArrayRef vao, const GLuint bindingIndex, GLBufferRef vbo, const GLintptr offset, const GLsizei stride)
+{
 	assert(IsValid(vao));
 	assert(IsValid(vbo));
 	if (IsValid(vao) && IsValid(vbo))
-		glVertexArrayVertexBuffer(*vao, 0, *vbo, 0, vertexSize);
+		glVertexArrayVertexBuffer(*vao, bindingIndex, *vbo, offset, stride);
 }
 //-----------------------------------------------------------------------------
 void RenderSystem::VertexArraySetIndexBuffer(GLVertexArrayRef vao, GLBufferRef ibo)
@@ -404,7 +465,7 @@ void RenderSystem::VertexArraySetIndexBuffer(GLVertexArrayRef vao, GLBufferRef i
 	assert(IsValid(vao));
 	assert(IsValid(ibo));
 	if (IsValid(vao) && IsValid(ibo))
-	glVertexArrayElementBuffer(*vao, *ibo);
+		glVertexArrayElementBuffer(*vao, *ibo);
 }
 //-----------------------------------------------------------------------------
 void RenderSystem::FramebufferSetTextures(GLFramebufferRef fbo, const std::vector<GLTextureRef>& cols, GLTextureRef depth)
@@ -509,6 +570,7 @@ void RenderSystem::initializeExtensions(bool print)
 #if defined(_DEBUG)
 	if (OpenGLExtensions::version >= OPENGL43 && glDebugMessageCallback)
 	{
+		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback(glDebugCallback, nullptr);
 		GLuint unusedIds = 0;

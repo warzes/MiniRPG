@@ -1,3 +1,10 @@
+SFML
+	Commits on May 24, 2024
+	Fix missing include of <algorithm>
+
+
+
+
 https://github.com/diharaw/volumetric-fog
 https://github.com/diharaw/volumetric-clouds
 https://github.com/diharaw/sdf-baking

@@ -20,10 +20,12 @@ GLSeparableShaderProgram::~GLSeparableShaderProgram()
 //-----------------------------------------------------------------------------
 GLSeparableShaderProgram& GLSeparableShaderProgram::operator=(GLSeparableShaderProgram&& other) noexcept
 {
-	destroyHandle();
-	m_handle = other.m_handle;
-	other.m_handle = 0;
-
+	if (this != &other)
+	{
+		destroyHandle();
+		m_handle = other.m_handle;
+		other.m_handle = 0;
+	}
 	return *this;
 };
 //-----------------------------------------------------------------------------
@@ -62,10 +64,12 @@ void GLSeparableShaderProgram::validate()
 //-----------------------------------------------------------------------------
 GLProgramPipeline& GLProgramPipeline::operator=(GLProgramPipeline&& other) noexcept
 {
-	destroyHandle();
-	m_handle = other.m_handle;
-	other.m_handle = 0;
-
+	if (this != &other)
+	{
+		destroyHandle();
+		m_handle = other.m_handle;
+		other.m_handle = 0;
+	}
 	return *this;
 };
 //-----------------------------------------------------------------------------
@@ -86,12 +90,66 @@ void GLProgramPipeline::destroyHandle()
 //-----------------------------------------------------------------------------
 GLBuffer& GLBuffer::operator=(GLBuffer&& other) noexcept
 {
-	destroyHandle();
-	m_handle = other.m_handle;
-	other.m_handle = 0;
-
+	if (this != &other)
+	{
+		destroyHandle();
+		m_handle = other.m_handle;
+		other.m_handle = 0;
+	}
 	return *this;
-};
+}
+//-----------------------------------------------------------------------------
+GLsizeiptr GLBuffer::Size() const
+{
+	return getParameter(GL_BUFFER_SIZE);
+}
+//-----------------------------------------------------------------------------
+GLenum GLBuffer::Usage() const
+{
+	return getParameter(GL_BUFFER_USAGE);
+}
+//-----------------------------------------------------------------------------
+GLenum GLBuffer::Access() const
+{
+	return getParameter(GL_BUFFER_ACCESS);
+}
+//-----------------------------------------------------------------------------
+GLbitfield GLBuffer::AccessFlags() const
+{
+	return getParameter(GL_BUFFER_ACCESS_FLAGS);
+}
+//-----------------------------------------------------------------------------
+bool GLBuffer::IsMapped() const
+{
+	return getParameter(GL_BUFFER_MAPPED) != 0;
+}
+//-----------------------------------------------------------------------------
+bool GLBuffer::IsImmutable() const
+{
+	return getParameter(GL_BUFFER_IMMUTABLE_STORAGE) != 0;
+}
+//-----------------------------------------------------------------------------
+GLbitfield GLBuffer::StorageFlags() const
+{
+	return getParameter(GL_BUFFER_STORAGE_FLAGS);
+}
+//-----------------------------------------------------------------------------
+GLintptr GLBuffer::MapOffset() const
+{
+	return getParameter64(GL_BUFFER_MAP_OFFSET);
+}
+//-----------------------------------------------------------------------------
+GLsizeiptr GLBuffer::MapSize() const
+{
+	return getParameter64(GL_BUFFER_MAP_LENGTH);
+}
+//-----------------------------------------------------------------------------
+void* GLBuffer::MapPointer() const
+{
+	void* pointer;
+	glGetNamedBufferPointerv(m_handle, GL_BUFFER_MAP_POINTER, &pointer);
+	return pointer;
+}
 //-----------------------------------------------------------------------------
 void GLBuffer::createHandle()
 {
@@ -106,12 +164,28 @@ void GLBuffer::destroyHandle()
 	m_handle = 0;
 }
 //-----------------------------------------------------------------------------
+GLint GLBuffer::getParameter(const GLenum parameter) const
+{
+	GLint result;
+	glGetNamedBufferParameteriv(m_handle, parameter, &result);
+	return result;
+}
+//-----------------------------------------------------------------------------
+GLint GLBuffer::getParameter64(const GLenum parameter) const
+{
+	GLint64 result;
+	glGetNamedBufferParameteri64v(m_handle, parameter, &result);
+	return result;
+}
+//-----------------------------------------------------------------------------
 GLVertexArray& GLVertexArray::operator=(GLVertexArray&& other) noexcept
 {
-	destroyHandle();
-	m_handle = other.m_handle;
-	other.m_handle = 0;
-
+	if (this != &other)
+	{
+		destroyHandle();
+		m_handle = other.m_handle;
+		other.m_handle = 0;
+	}
 	return *this;
 };
 //-----------------------------------------------------------------------------
@@ -130,10 +204,12 @@ void GLVertexArray::destroyHandle()
 //-----------------------------------------------------------------------------
 GLTexture& GLTexture::operator=(GLTexture&& other) noexcept
 {
-	destroyHandle();
-	m_handle = other.m_handle;
-	other.m_handle = 0;
-
+	if (this != &other)
+	{
+		destroyHandle();
+		m_handle = other.m_handle;
+		other.m_handle = 0;
+	}
 	return *this;
 };
 //-----------------------------------------------------------------------------
@@ -152,10 +228,12 @@ void GLTexture::destroyHandle()
 //-----------------------------------------------------------------------------
 GLFramebuffer& GLFramebuffer::operator=(GLFramebuffer&& other) noexcept
 {
-	destroyHandle();
-	m_handle = other.m_handle;
-	other.m_handle = 0;
-
+	if (this != &other)
+	{
+		destroyHandle();
+		m_handle = other.m_handle;
+		other.m_handle = 0;
+	}
 	return *this;
 };
 //-----------------------------------------------------------------------------

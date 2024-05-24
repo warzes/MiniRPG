@@ -19,11 +19,11 @@ public:
 	static inline const std::size_t InvalidPos{ std::u32string::npos };
 
 	String() = default;
-	String(char ansiChar, const std::locale& locale = std::locale());
+	String(char ansiChar, const std::locale& locale = {});
 	String(wchar_t wideChar);
 	String(char32_t utf32Char);
-	String(const char* ansiString, const std::locale& locale = std::locale());
-	String(const std::string& ansiString, const std::locale& locale = std::locale());
+	String(const char* ansiString, const std::locale& locale = {});
+	String(const std::string& ansiString, const std::locale& locale = {});
 	String(const wchar_t* wideString);
 	String(const std::wstring& wideString);
 	String(const char32_t* utf32String);
@@ -40,7 +40,7 @@ public:
 	operator std::wstring() const;
 
 	// Convert the Unicode string to an ANSI string
-	[[nodiscard]] std::string ToAnsiString(const std::locale& locale = std::locale()) const;
+	[[nodiscard]] std::string ToAnsiString(const std::locale& locale = {}) const;
 	// Convert the Unicode string to a wide string
 	[[nodiscard]] std::wstring ToWideString() const;
 

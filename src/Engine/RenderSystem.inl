@@ -1,9 +1,9 @@
 template<typename T>
 inline GLBufferRef RenderSystem::CreateBuffer(const std::vector<T>& buff, GLenum flags)
 {
-	auto resource = std::make_shared<GLBuffer>();
+	auto resource = CreateBuffer();
 	if (!IsValid(resource)) return nullptr;
-	glNamedBufferStorage(*resource, sizeof(typename std::vector<T>::value_type) * buff.size(), buff.data(), flags);
+	SetDataImmutable(resource, buff, flags);
 	return resource;
 }
 
@@ -110,4 +110,22 @@ inline void RenderSystem::SetUniform(GLSeparableShaderProgramRef shader, GLint l
 	else if constexpr (std::is_same_v<T, glm::mat3>) glProgramUniformMatrix3fv(*shader, location, 1, GL_FALSE, glm::value_ptr(value));
 	else if constexpr (std::is_same_v<T, glm::mat4>) glProgramUniformMatrix4fv(*shader, location, 1, GL_FALSE, glm::value_ptr(value));
 	else m_systems.log->Fatal("unsupported type");
+}
+
+template<typename T>
+inline void RenderSystem::SetDataImmutable(GLBufferRef buffer, const std::vector<T>& buff, GLenum flags)
+{
+	glNamedBufferStorage(*buffer, sizeof(typename std::vector<T>::value_type) * buff.size(), buff.data(), flags);
+}
+
+template<typename T>
+inline void RenderSystem::SetData(GLBufferRef buffer, const std::vector<T>& buff, GLenum usage)
+{
+	glNamedBufferData(*buffer, sizeof(typename std::vector<T>::value_type) * buff.size(), buff.data(), usage);
+}
+
+template<typename T>
+inline void RenderSystem::SetSubData(GLBufferRef buffer, GLintptr offset, const std::vector<T>& buff)
+{
+	glNamedBufferSubData(*buffer, offset, sizeof(typename std::vector<T>::value_type) * buff.size(), buff.data());
 }

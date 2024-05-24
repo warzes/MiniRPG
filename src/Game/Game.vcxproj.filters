@@ -6,14 +6,89 @@
     <ClCompile Include="GameApp.cpp">
       <Filter>App</Filter>
     </ClCompile>
+    <ClCompile Include="Multithreading.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="t1Animation.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="Bone.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysicsManager.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureManager.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="TempImage.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundManager.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrices.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="Framebuffer.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="t1Renderer.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="t1Camera.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
     <ClCompile Include="Model.cpp">
-      <Filter>Temp</Filter>
+      <Filter>Test2</Filter>
     </ClCompile>
-    <ClCompile Include="Util.cpp">
-      <Filter>Temp</Filter>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>Test2</Filter>
     </ClCompile>
-    <ClCompile Include="Ssao.cpp">
-      <Filter>Temp</Filter>
+    <ClCompile Include="ShadowManager.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="Test1App.cpp">
+      <Filter>Test1</Filter>
+    </ClCompile>
+    <ClCompile Include="Test2App.cpp">
+      <Filter>Test2</Filter>
+    </ClCompile>
+    <ClCompile Include="FileOpener.cpp">
+      <Filter>Test3</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsResource.cpp">
+      <Filter>Test3</Filter>
+    </ClCompile>
+    <ClCompile Include="Animations.cpp">
+      <Filter>Test3</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Test3</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicModel.cpp">
+      <Filter>Test3</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Test3</Filter>
+    </ClCompile>
+    <ClCompile Include="Test3App.cpp">
+      <Filter>Test3</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -21,51 +96,135 @@
     <ClInclude Include="GameApp.h">
       <Filter>App</Filter>
     </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="Multithreading.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="t1Animation.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="Bone.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicsManager.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureManager.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="TempImage.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundManager.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrices.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="Framebuffer.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="t1Renderer.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="t1Camera.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
     <ClInclude Include="Model.h">
-      <Filter>Temp</Filter>
+      <Filter>Test2</Filter>
     </ClInclude>
-    <ClInclude Include="Util.h">
-      <Filter>Temp</Filter>
+    <ClInclude Include="SceneManager.h">
+      <Filter>Test2</Filter>
     </ClInclude>
-    <ClInclude Include="Ssao.h">
-      <Filter>Temp</Filter>
+    <ClInclude Include="ShadowManager.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="Test1App.h">
+      <Filter>Test1</Filter>
+    </ClInclude>
+    <ClInclude Include="Test2App.h">
+      <Filter>Test2</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsResource.h">
+      <Filter>Test3</Filter>
+    </ClInclude>
+    <ClInclude Include="FileOpener.h">
+      <Filter>Test3</Filter>
+    </ClInclude>
+    <ClInclude Include="Animations.h">
+      <Filter>Test3</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Test3</Filter>
+    </ClInclude>
+    <ClInclude Include="OBJ_Loader.h">
+      <Filter>Test3</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicModel.h">
+      <Filter>Test3</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Test3</Filter>
+    </ClInclude>
+    <ClInclude Include="profiler.h">
+      <Filter>Test3</Filter>
+    </ClInclude>
+    <ClInclude Include="Test3App.h">
+      <Filter>Test3</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="App">
       <UniqueIdentifier>{742a5fa7-921d-46f5-961f-0165aa9ee3e0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Framework">
-      <UniqueIdentifier>{4f5a0c81-b4c3-422d-bb22-6812ac0e0a94}</UniqueIdentifier>
+    <Filter Include="Test1">
+      <UniqueIdentifier>{950c129f-a466-4e6c-8edb-1eeaa8b069c0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Temp">
-      <UniqueIdentifier>{165822fe-6339-4e39-93e5-68bd572e0702}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="GameData">
-      <UniqueIdentifier>{2f9e7249-9b24-4ff5-9e76-9b477e2acf9c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shader">
+    <Filter Include="Test1\Shader">
       <UniqueIdentifier>{84bbf24f-97da-4444-b43e-7cdf2ce82912}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test2">
+      <UniqueIdentifier>{86a07967-cd8f-48ae-aec0-61d985b21bef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test3">
+      <UniqueIdentifier>{5ff3124b-5662-42c3-8271-426962c67925}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="blur.frag.glsl">
-      <Filter>Shader</Filter>
+      <Filter>Test1\Shader</Filter>
     </None>
     <None Include="blur.vert.glsl">
-      <Filter>Shader</Filter>
+      <Filter>Test1\Shader</Filter>
     </None>
     <None Include="gbuffer.frag.glsl">
-      <Filter>Shader</Filter>
+      <Filter>Test1\Shader</Filter>
     </None>
     <None Include="gbuffer.vert.glsl">
-      <Filter>Shader</Filter>
+      <Filter>Test1\Shader</Filter>
     </None>
     <None Include="main.frag.glsl">
-      <Filter>Shader</Filter>
+      <Filter>Test1\Shader</Filter>
     </None>
     <None Include="main.vert.glsl">
-      <Filter>Shader</Filter>
+      <Filter>Test1\Shader</Filter>
     </None>
   </ItemGroup>
 </Project>

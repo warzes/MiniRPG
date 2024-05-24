@@ -67,9 +67,23 @@ public:
 	operator GLuint() const noexcept { return m_handle; }
 	bool IsValid() const noexcept { return m_handle != 0; }
 
+	[[nodiscard]] GLsizeiptr Size() const;
+	[[nodiscard]] GLenum Usage() const;
+	[[nodiscard]] GLenum Access() const;
+	[[nodiscard]] GLbitfield AccessFlags() const;
+	[[nodiscard]] bool IsMapped() const;
+	[[nodiscard]] bool IsImmutable() const;
+	[[nodiscard]] GLbitfield StorageFlags() const;
+	[[nodiscard]] GLintptr MapOffset() const;
+	[[nodiscard]] GLsizeiptr MapSize() const;
+	[[nodiscard]] void* MapPointer() const;
+
 private:
 	void createHandle();
 	void destroyHandle();
+
+	[[nodiscard]] GLint getParameter(const GLenum parameter) const;
+	[[nodiscard]] GLint getParameter64(const GLenum parameter) const;
 
 	GLuint m_handle = 0;
 };

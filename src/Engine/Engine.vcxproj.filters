@@ -53,6 +53,78 @@
     <ClCompile Include="GenerateUUID.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Listener.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector3.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioDevice.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="TempError.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioResource.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="InputSoundFile.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundFileFactory.cpp">
+      <Filter>Audio\Codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="MiniaudioUtils.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Music.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundSource.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundStream.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundRecorder.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundBuffer.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="OutputSoundFile.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundBufferRecorder.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundFileReaderFlac.cpp">
+      <Filter>Audio\Codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundFileReaderMp3.cpp">
+      <Filter>Audio\Codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundFileReaderOgg.cpp">
+      <Filter>Audio\Codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundFileReaderWav.cpp">
+      <Filter>Audio\Codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundFileWriterFlac.cpp">
+      <Filter>Audio\Codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundFileWriterOgg.cpp">
+      <Filter>Audio\Codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundFileWriterWav.cpp">
+      <Filter>Audio\Codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector2.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -140,6 +212,96 @@
     <ClInclude Include="GenerateUUID.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Listener.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Angle.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector3.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioDevice.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="TempError.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioResource.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundChannel.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundFileReader.h">
+      <Filter>Audio\Codecs</Filter>
+    </ClInclude>
+    <ClInclude Include="InputSoundFile.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundFileFactory.h">
+      <Filter>Audio\Codecs</Filter>
+    </ClInclude>
+    <ClInclude Include="MiniaudioUtils.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Music.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundSource.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundStream.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundRecorder.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundBuffer.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="OutputSoundFile.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundFileWriter.h">
+      <Filter>Audio\Codecs</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundBufferRecorder.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundFileReaderFlac.h">
+      <Filter>Audio\Codecs</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundFileReaderMp3.h">
+      <Filter>Audio\Codecs</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundFileReaderOgg.h">
+      <Filter>Audio\Codecs</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundFileReaderWav.h">
+      <Filter>Audio\Codecs</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundFileWriterFlac.h">
+      <Filter>Audio\Codecs</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundFileWriterOgg.h">
+      <Filter>Audio\Codecs</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundFileWriterWav.h">
+      <Filter>Audio\Codecs</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Color.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Rect.h">
+      <Filter>Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -169,10 +331,34 @@
     <Filter Include="Base">
       <UniqueIdentifier>{87146f67-ccc7-47d2-a453-3136b039b812}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Audio">
+      <UniqueIdentifier>{9b846d86-ae41-4f90-a23f-c49a1e501b07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Audio\Codecs">
+      <UniqueIdentifier>{24d91c18-41ba-4eb9-bd4f-96ac2c766dbf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="RenderSystem.inl">
       <Filter>Render</Filter>
+    </None>
+    <None Include="Angle.inl">
+      <Filter>Math</Filter>
+    </None>
+    <None Include="Vector3.inl">
+      <Filter>Math</Filter>
+    </None>
+    <None Include="SoundFileFactory.inl">
+      <Filter>Audio\Codecs</Filter>
+    </None>
+    <None Include="Vector2.inl">
+      <Filter>Math</Filter>
+    </None>
+    <None Include="Color.inl">
+      <Filter>Math</Filter>
+    </None>
+    <None Include="Rect.inl">
+      <Filter>Math</Filter>
     </None>
   </ItemGroup>
 </Project>
