@@ -47,6 +47,8 @@
 
 #include <json/json.h>
 
+#include "imgui/imgui.h"
+
 #if defined(_MSC_VER)
 #	pragma warning(pop)
 #endif

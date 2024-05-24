@@ -48,8 +48,6 @@
 #include <json/json.h>
 
 #include "imgui/imgui.h"
-#include "imgui/imgui_impl_opengl3.h"
-#include "imgui/imgui_impl_win32.h"
 
 #if defined(_MSC_VER)
 #	pragma warning(pop)

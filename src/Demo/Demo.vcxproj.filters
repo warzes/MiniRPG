@@ -7,9 +7,8 @@
     <ClCompile Include="DemoApp001.cpp">
       <Filter>001 Reflective shadow map</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsSystem.cpp">
-      <Filter>001 Reflective shadow map</Filter>
-    </ClCompile>
+    <ClCompile Include="GraphicsSystem.cpp" />
+    <ClCompile Include="GraphicsResources.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameApp.h" />
@@ -17,9 +16,9 @@
     <ClInclude Include="DemoApp001.h">
       <Filter>001 Reflective shadow map</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsSystem.h">
-      <Filter>001 Reflective shadow map</Filter>
-    </ClInclude>
+    <ClInclude Include="GraphicsSystem.h" />
+    <ClInclude Include="GraphicsResources.h" />
+    <ClInclude Include="MVector.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="001 Reflective shadow map">
