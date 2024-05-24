@@ -5,6 +5,7 @@
 #include "EngineTime.h"
 #include "Sleep.h"
 #include "TemporaryWindow.h"
+#include "MainGUISystem.h"
 //-----------------------------------------------------------------------------
 #pragma comment(lib, "opengl32.lib")
 #pragma comment(lib, "winmm.lib")
@@ -495,8 +496,11 @@ LRESULT WindowSystem::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
 	if ((message == WM_SYSCOMMAND) && (wParam == SC_KEYMENU))
 		return 0;
 
-	if (ImGui_ImplWin32_WndProcHandler(m_handle, message, wParam, lParam))
-		return 0;
+	if (m_systems.mainGUI->IsEnable())
+	{
+		if (ImGui_ImplWin32_WndProcHandler(m_handle, message, wParam, lParam))
+			return 0;
+	}
 
 	switch (message)
 	{

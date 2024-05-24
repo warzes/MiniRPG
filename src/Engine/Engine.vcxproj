@@ -106,6 +106,7 @@
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Listener.cpp" />
     <ClCompile Include="LogSystem.cpp" />
+    <ClCompile Include="MainGUISystem.cpp" />
     <ClCompile Include="MemoryInputStream.cpp" />
     <ClCompile Include="MiniaudioUtils.cpp" />
     <ClCompile Include="Mouse.cpp" />
@@ -160,6 +161,7 @@
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="Listener.h" />
     <ClInclude Include="LogSystem.h" />
+    <ClInclude Include="MainGUISystem.h" />
     <ClInclude Include="MemoryInputStream.h" />
     <ClInclude Include="MiniaudioUtils.h" />
     <ClInclude Include="Mouse.h" />

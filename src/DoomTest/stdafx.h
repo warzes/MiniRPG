@@ -80,6 +80,8 @@
 #include "Engine/RenderSystem.h"
 #include "Engine/RenderCamera.h"
 
+#include "Engine/MainGUISystem.h"
+
 // Audio
 #include "Engine/InputSoundFile.h"
 #include "Engine/Listener.h"

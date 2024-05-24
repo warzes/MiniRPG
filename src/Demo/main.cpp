@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "GameApp.h"
+#include "DemoApp001.h"
 //-----------------------------------------------------------------------------
 #if defined(_MSC_VER)
 #	pragma comment( lib, "3rdparty.lib" )
@@ -27,7 +28,8 @@ int main(
 	[[maybe_unused]] int   argc,
 	[[maybe_unused]] char* argv[])
 {
-	GameApp app;
+	//GameApp app;
+	DemoApp001 app;
 	app.Run();
 }
 //-----------------------------------------------------------------------------

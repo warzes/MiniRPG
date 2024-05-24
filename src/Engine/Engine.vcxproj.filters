@@ -125,6 +125,9 @@
     <ClCompile Include="Vector2.cpp">
       <Filter>Math</Filter>
     </ClCompile>
+    <ClCompile Include="MainGUISystem.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -302,6 +305,9 @@
     <ClInclude Include="Rect.h">
       <Filter>Math</Filter>
     </ClInclude>
+    <ClInclude Include="MainGUISystem.h">
+      <Filter>UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -336,6 +342,9 @@
     </Filter>
     <Filter Include="Audio\Codecs">
       <UniqueIdentifier>{24d91c18-41ba-4eb9-bd4f-96ac2c766dbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{5cf9531f-09fb-4f57-94f9-b536a2833ffe}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
