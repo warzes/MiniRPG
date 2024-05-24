@@ -15,13 +15,13 @@
 //#include "stb_include.h"
 #define STB_PERLIN_IMPLEMENTATION
 #include "stb_perlin.h"
-#define STB_RECT_PACK_IMPLEMENTATION
-#include "stb_rect_pack.h"
-#define STB_SPRINTF_IMPLEMENTATION
-#include "stb_sprintf.h"
+//#define STB_RECT_PACK_IMPLEMENTATION // USE IMGUI
+//#include "stb_rect_pack.h"
+//#define STB_SPRINTF_IMPLEMENTATION // USE IMGUI
+//#include "stb_sprintf.h"
 //#define STB_TILEMAP_EDITOR_IMPLEMENTATION
-#include "stb_tilemap_editor.h"
-#define STB_TRUETYPE_IMPLEMENTATION
-#include "stb_truetype.h"
+//#include "stb_tilemap_editor.h"
+//#define STB_TRUETYPE_IMPLEMENTATION // USE IMGUI
+//#include "stb_truetype.h"
 #define STB_VORBIS_IMPLEMENTATION
 #include "stb_vorbis.h"

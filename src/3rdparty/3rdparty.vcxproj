@@ -330,7 +330,6 @@
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_opengl3.h" />
-    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="imgui\imgui_impl_win32.h" />
     <ClInclude Include="imgui\imgui_internal.h" />
     <ClInclude Include="imgui\imstb_rectpack.h" />
@@ -346,10 +345,7 @@
     <ClInclude Include="stb\stb_image_write.h" />
     <ClInclude Include="stb\stb_include.h" />
     <ClInclude Include="stb\stb_perlin.h" />
-    <ClInclude Include="stb\stb_rect_pack.h" />
-    <ClInclude Include="stb\stb_sprintf.h" />
     <ClInclude Include="stb\stb_tilemap_editor.h" />
-    <ClInclude Include="stb\stb_truetype.h" />
     <ClInclude Include="stb\stb_vorbis.h" />
     <ClInclude Include="tiny_gltf.h" />
     <ClInclude Include="tiny_obj_loader.h" />
