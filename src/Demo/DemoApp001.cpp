@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "DemoApp001.h"
 #include "GraphicsSystem.h"
 
@@ -60,6 +60,58 @@ namespace
 
 		int width = 0;
 		int height = 0;
+	};
+
+	struct RSMBuffer
+	{
+		void Create(RenderSystem& render, int inWidth, int inHeight)
+		{
+			Destroy();
+
+			width = inWidth;
+			height = inHeight;
+
+			textureFlux     = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
+			textureNormal   = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
+			texturePosition = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
+			textureDepth = render.CreateTexture2D(GL_DEPTH_COMPONENT32, GL_DEPTH, width, height, nullptr, GL_NEAREST);
+
+			fbo = render.CreateFramebuffer({ textureFlux, textureNormal, texturePosition }, textureDepth);
+		}
+
+		void Destroy()
+		{
+			textureFlux.reset();
+			textureNormal.reset();
+			texturePosition.reset();
+			textureDepth.reset();
+
+			fbo.reset();
+		}
+
+		void Bind(RenderSystem& render)
+		{
+			const auto depthClearVal = 1.0f;
+			render.FramebufferClear(fbo, GL_COLOR, 0, glm::value_ptr(glm::vec3(0.0f)));
+			render.FramebufferClear(fbo, GL_COLOR, 1, glm::value_ptr(glm::vec3(0.0f)));
+			render.FramebufferClear(fbo, GL_COLOR, 2, glm::value_ptr(glm::vec3(0.0f)));
+			render.FramebufferClear(fbo, GL_DEPTH, 0, &depthClearVal);
+
+			render.Bind(fbo);
+		}
+
+		GLFramebufferRef fbo = nullptr;
+
+		GLTextureRef textureFlux = nullptr;
+		GLTextureRef textureNormal = nullptr;
+		GLTextureRef texturePosition = nullptr;
+		GLTextureRef textureDepth = nullptr;
+
+		int width = 0;
+		int height = 0;
+
+		int rsmResolution = 256; // 1024
+		glm::vec3 directionalLightDirection = glm::vec3(-1.0f); // TODO: временно
 	};
 
 	struct FinalFrameBuffer
@@ -158,6 +210,75 @@ void main()
 	outNormal = i.Normal;
 	outAlbedo.rgb = diffuseTex.rgb * i.Color;
 	outAlbedo.a = diffuseTex.a;
+}
+		)";
+#pragma endregion
+
+
+#pragma region RSMShader
+	const char* rsmVertSource = R"(
+#version 460
+#pragma debug(on)
+
+out gl_PerVertex { vec4 gl_Position; };
+
+out outBlock
+{
+	vec3 FragPosInViewSpace; // POSITION
+	vec3 Color;
+	vec3 Normal;
+	vec2 TexCoords;
+} o;
+
+layout (location = 0) in vec3 Position;
+layout (location = 1) in vec3 Color;
+layout (location = 2) in vec3 Normal;
+layout (location = 3) in vec2 TexCoords;
+
+layout (location = 0) uniform mat4 projectionMatrix;
+layout (location = 1) uniform mat4 viewMatrix;
+layout (location = 2) uniform mat4 modelMatrix;
+layout (location = 3) uniform mat4 lightVPMatrix;
+
+void main()
+{
+	const vec4 FragPosInViewSpace = modelMatrix * vec4(Position, 1.0);
+	gl_Position = lightVPMatrix * FragPosInViewSpace;
+	o.Color = Color;
+	o.TexCoords = TexCoords;
+	o.Normal = normalize(mat3(transpose(inverse(viewMatrix * modelMatrix))) * Normal);
+	o.FragPosInViewSpace = vec3(viewMatrix * FragPosInViewSpace);
+}
+		)";
+
+	const char* rsmFragSource = R"(
+#version 460
+#pragma debug(on)
+
+in inBlock
+{
+	vec3 FragPosInViewSpace;
+	vec3 Color;
+	vec3 Normal;
+	vec2 TexCoords;
+} i;
+
+layout (location = 0) out vec3 outFlux;
+layout (location = 1) out vec3 outNormal;
+layout (location = 2) out vec3 outPosition;
+
+layout(location = 0) uniform vec3 lightColor = vec3(1);
+
+layout(binding = 0) uniform sampler2D DiffuseTexture;
+
+void main()
+{
+	vec3 diffuseTex = texture(DiffuseTexture, i.TexCoords).rgb * i.Color;
+	//diffuseTex = pow(diffuseTex, vec3(2.2));
+	vec3 VPLFlux = lightColor * diffuseTex;
+	outFlux = VPLFlux;
+	outNormal = i.Normal;
+	outPosition = i.FragPosInViewSpace;
 }
 		)";
 #pragma endregion
@@ -314,10 +435,17 @@ void DemoApp001::Run()
 	glEnable(GL_DEPTH_TEST);
 
 	GLProgramPipelineRef ppGBuffer = render.CreateProgramPipelineFromSources(gbufferVertSource, gbufferFragSource);
+	GLProgramPipelineRef ppRSMBuffer = render.CreateProgramPipelineFromSources(rsmVertSource, rsmFragSource);
 	GLProgramPipelineRef oldppMain = render.CreateProgramPipelineFromSources(oldMainVertSource, oldMainFragSource);
 	constexpr auto uniform_projection = 0;
 	constexpr auto uniform_view = 1;
 	constexpr auto uniform_modl = 2;
+
+	// rsm vertex
+	constexpr auto uniform_RSM_lightVPMatrix = 3;
+
+	// rsm fragment
+	constexpr auto uniform_RSM_light_color = 0;
 
 	// main vertex
 	constexpr auto uniform_cam_dir = 0;
@@ -329,6 +457,7 @@ void DemoApp001::Run()
 	constexpr auto uniform_cam_pos = 0;
 	constexpr auto uniform_light_col = 1;
 	constexpr auto uniform_light_pos = 2;
+
 
 	//constexpr auto uniform_lght = 3;
 	//constexpr auto uniform_blur_bias = 0;
@@ -348,6 +477,8 @@ void DemoApp001::Run()
 	GLVertexArrayRef VAOEmpty = render.CreateVertexArray();
 	GBuffer gbuffer;
 	gbuffer.Create(render, window.GetWidth(), window.GetHeight());
+	RSMBuffer rsmBuffer;
+	rsmBuffer.Create(render, window.GetWidth(), window.GetHeight());
 	FinalFrameBuffer finalFB;
 	finalFB.Create(render, window.GetWidth(), window.GetHeight());
 
@@ -362,6 +493,13 @@ void DemoApp001::Run()
 
 	constexpr auto fov = glm::radians(60.0f);
 	static glm::vec3 light_pos = glm::vec3(0.0, 4.0, 0.0);
+
+	// RSM
+	glm::vec3 LightPos = glm::vec3(-0.15f, -1.13f, -0.58);
+	glm::vec3 LightDir = glm::normalize(glm::vec3(-1.0f, -0.7071f, 0.0f));
+	glm::mat4 LightViewMatrix = glm::lookAt(LightPos, LightPos + LightDir, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 LightProjectionMatrix = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, 0.1f, 10.0f);
+	glm::mat4 LightVPMatrix = LightProjectionMatrix * LightViewMatrix;
 
 	while (1)
 	{
@@ -402,6 +540,7 @@ void DemoApp001::Run()
 
 				// resize framebuffer
 				gbuffer.Create(render, width, height);
+				rsmBuffer.Create(render, width, height);
 				finalFB.Create(render, width, height);
 			}
 
@@ -451,7 +590,7 @@ void DemoApp001::Run()
 
 				ImGui::Begin("Hello, world!");
 				//ImGui::PushFont(font1);
-				ImGui::Text((const char*)u8"Test/����/%s", u8"���� 2");
+				ImGui::Text((const char*)u8"Test/Тест/%s", u8"тест 2");
 				//ImGui::PopFont();
 				if (ImGui::Button("Button"))
 					counter++;
@@ -478,6 +617,17 @@ void DemoApp001::Run()
 				render.SetUniform(ppGBuffer->GetVertexShader(), uniform_view, m_camera.GetViewMatrix());
 				render.SetUniform(ppGBuffer->GetVertexShader(), uniform_modl, glm::mat4(1.0f));
 				model->Update(ppGBuffer);
+			}
+
+			// RSM
+			{
+				rsmBuffer.Bind(render);
+				render.Bind(ppRSMBuffer);
+				render.SetUniform(ppRSMBuffer->GetVertexShader(), uniform_projection, m_perspective);
+				render.SetUniform(ppRSMBuffer->GetVertexShader(), uniform_view, m_camera.GetViewMatrix());
+				render.SetUniform(ppRSMBuffer->GetVertexShader(), uniform_modl, glm::mat4(1.0f));
+				render.SetUniform(ppRSMBuffer->GetVertexShader(), uniform_RSM_lightVPMatrix, LightVPMatrix);
+				model->Update(ppRSMBuffer);
 			}
 
 			// Final Frame
@@ -517,6 +667,10 @@ void DemoApp001::Run()
 		}
 		render.EndFrame();
 	}
+	ppRSMBuffer.reset();
+	rsmBuffer.Destroy();
+	oldppMain.reset();
+	finalFB.Destroy();
 	ppGBuffer.reset();
 	gbuffer.Destroy();
 	mainGUI.Destroy();
