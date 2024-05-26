@@ -85,9 +85,10 @@ void GMesh::init()
 	const std::vector<AttribFormat> vertexFormat =
 	{
 		CreateAttribFormat<glm::vec3>(0, offsetof(GMeshVertex, position)),
-		CreateAttribFormat<glm::vec3>(1, offsetof(GMeshVertex, normal)),
-		CreateAttribFormat<glm::vec3>(2, offsetof(GMeshVertex, texCoords)),
-		CreateAttribFormat<glm::vec2>(3, offsetof(GMeshVertex, tangent))
+		CreateAttribFormat<glm::vec3>(1, offsetof(GMeshVertex, color)),
+		CreateAttribFormat<glm::vec3>(2, offsetof(GMeshVertex, normal)),
+		CreateAttribFormat<glm::vec3>(3, offsetof(GMeshVertex, texCoords)),
+		CreateAttribFormat<glm::vec2>(4, offsetof(GMeshVertex, tangent))
 	};
 	m_geometry = m_systems.render->CreateGeometry(m_vertices, m_indices, vertexFormat);
 }

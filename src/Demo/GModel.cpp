@@ -84,22 +84,28 @@ void GModel::processVertex(const aiMesh* AiMesh, std::vector<GMeshVertex>& verti
 	GLint NumVertices = (GLint)AiMesh->mNumVertices;
 	for (GLint i = 0; i < NumVertices; ++i)
 	{
-		GMeshVertex Vertex;
-		Vertex.position = glm::vec3(AiMesh->mVertices[i].x, AiMesh->mVertices[i].y, AiMesh->mVertices[i].z);
-		if (AiMesh->mNormals != nullptr)
-			Vertex.normal = glm::vec3(AiMesh->mNormals[i].x, AiMesh->mNormals[i].y, AiMesh->mNormals[i].z);
+		GMeshVertex vertex;
+		vertex.position = glm::vec3(AiMesh->mVertices[i].x, AiMesh->mVertices[i].y, AiMesh->mVertices[i].z);
+
+		//if (AiMesh->mColors) // TODO: ошибка
+		//	vertex.color = glm::vec3(AiMesh->mColors[i]->r, AiMesh->mColors[i]->g, AiMesh->mColors[i]->b); // TODO: а нужно ли брать альфу?
+		//else
+			vertex.color = glm::vec3(1.0f);
+
+		if (AiMesh->mNormals)
+			vertex.normal = glm::vec3(AiMesh->mNormals[i].x, AiMesh->mNormals[i].y, AiMesh->mNormals[i].z);
 		else
-			Vertex.normal = glm::vec3(0.0f, 0.0f, 0.0f);
+			vertex.normal = glm::vec3(0.0f, 0.0f, 0.0f);
 		
-		if (AiMesh->mTextureCoords[0]) 
-			Vertex.texCoords = glm::vec2(AiMesh->mTextureCoords[0][i].x, AiMesh->mTextureCoords[0][i].y);
+		if (AiMesh->mTextureCoords[0])
+			vertex.texCoords = glm::vec2(AiMesh->mTextureCoords[0][i].x, AiMesh->mTextureCoords[0][i].y);
 		else 
-			Vertex.texCoords = glm::vec2(0.0f, 0.0f);
+			vertex.texCoords = glm::vec2(0.0f, 0.0f);
 
 		if (AiMesh->mTangents)
-			Vertex.tangent = glm::vec3(AiMesh->mTangents[i].x, AiMesh->mTangents[i].y, AiMesh->mTangents[i].z);
+			vertex.tangent = glm::vec3(AiMesh->mTangents[i].x, AiMesh->mTangents[i].y, AiMesh->mTangents[i].z);
 
-		vertices.push_back(Vertex);
+		vertices.push_back(vertex);
 	}
 }
 //-----------------------------------------------------------------------------

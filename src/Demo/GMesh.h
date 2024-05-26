@@ -37,6 +37,7 @@ constexpr inline AttribFormat CreateAttribFormat(GLuint attribIndex, GLuint rela
 struct GMeshVertex final
 {
 	glm::vec3 position;
+	glm::vec3 color;
 	glm::vec3 normal;
 	glm::vec2 texCoords;
 	glm::vec3 tangent;
