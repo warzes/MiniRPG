@@ -95,22 +95,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DA001_GBufferPass.cpp" />
+    <ClCompile Include="DA001_HalfCornellBox.cpp" />
     <ClCompile Include="DemoApp001.cpp" />
     <ClCompile Include="GameApp.cpp" />
+    <ClCompile Include="GMesh.cpp" />
+    <ClCompile Include="GModel.cpp" />
     <ClCompile Include="GraphicsResources.cpp" />
     <ClCompile Include="GraphicsSystem.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RenderPass.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DA001_GBufferPass.h" />
+    <ClInclude Include="DA001_HalfCornellBox.h" />
     <ClInclude Include="DemoApp001.h" />
     <ClInclude Include="GameApp.h" />
+    <ClInclude Include="GMesh.h" />
+    <ClInclude Include="GModel.h" />
     <ClInclude Include="GraphicsResources.h" />
     <ClInclude Include="GraphicsSystem.h" />
     <ClInclude Include="MVector.h" />
+    <ClInclude Include="RenderPass.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

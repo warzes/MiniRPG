@@ -93,6 +93,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AABB.cpp" />
     <ClCompile Include="AudioDevice.cpp" />
     <ClCompile Include="AudioResource.cpp" />
     <ClCompile Include="Clock.cpp" />
@@ -141,6 +142,7 @@
     <ClCompile Include="WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABB.h" />
     <ClInclude Include="Angle.h" />
     <ClInclude Include="AudioDevice.h" />
     <ClInclude Include="AudioResource.h" />

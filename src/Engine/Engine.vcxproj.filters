@@ -128,6 +128,9 @@
     <ClCompile Include="MainGUISystem.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="AABB.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -307,6 +310,9 @@
     </ClInclude>
     <ClInclude Include="MainGUISystem.h">
       <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="AABB.h">
+      <Filter>Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

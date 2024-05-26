@@ -496,7 +496,7 @@ LRESULT WindowSystem::processEvent(UINT message, WPARAM wParam, LPARAM lParam)
 	if ((message == WM_SYSCOMMAND) && (wParam == SC_KEYMENU))
 		return 0;
 
-	if (m_systems.mainGUI->IsEnable())
+	if (m_systems.mainGUI && m_systems.mainGUI->IsEnable())
 	{
 		if (ImGui_ImplWin32_WndProcHandler(m_handle, message, wParam, lParam))
 			return 0;
