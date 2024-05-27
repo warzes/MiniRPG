@@ -2,6 +2,8 @@
 #include "DemoApp001.h"
 #include "GraphicsSystem.h"
 
+// TODO: возможно проблема в матрицах
+
 namespace
 {
 	struct GBuffer
@@ -14,12 +16,12 @@ namespace
 			height = inHeight;
 
 			// TODO: нет поддержи формата текстур GL_FLOAT - возможно нужно тут
-			textureGBufferPosition = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
-			textureGBufferNormal = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
-			textureGBufferAlbedo = render.CreateTexture2D(GL_RGBA16F, GL_RGBA, width, height, nullptr, GL_NEAREST);
+			textureGBufferPosition = render.CreateTexture2D(GL_RGBA32F, GL_RGBA, GL_FLOAT, width, height, nullptr, GL_LINEAR);
+			textureGBufferNormal = render.CreateTexture2D(GL_RGBA32F, GL_RGBA, GL_FLOAT, width, height, nullptr, GL_LINEAR);
+			textureGBufferAlbedo = render.CreateTexture2D(GL_RGBA32F, GL_RGBA, GL_FLOAT, width, height, nullptr, GL_LINEAR);
 			//textureGBufferVelocity = render.CreateTexture2D(GL_RG16F, GL_RG, width, height, nullptr, GL_NEAREST);
 			//textureGBufferEmissive = render.CreateTexture2D(GL_RGB8, GL_RGB, width, height, nullptr, GL_NEAREST);
-			textureGBufferDepth = render.CreateTexture2D(GL_DEPTH_COMPONENT32, GL_DEPTH, width, height, nullptr, GL_NEAREST);
+			textureGBufferDepth = render.CreateTexture2D(GL_DEPTH_COMPONENT32, GL_DEPTH, GL_FLOAT, width, height, nullptr, GL_NEAREST);
 
 			fbo = render.CreateFramebuffer({ textureGBufferPosition, textureGBufferNormal, textureGBufferAlbedo/*, textureGBufferVelocity, textureGBufferEmissive*/ }, textureGBufferDepth);
 		}
@@ -73,12 +75,11 @@ namespace
 			height = inHeight;
 
 			// TODO: нет поддержи формата текстур GL_FLOAT - возможно нужно тут
-			textureFlux     = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
-			textureNormal   = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
-			texturePosition = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
-			textureDepth = render.CreateTexture2D(GL_DEPTH_COMPONENT32, GL_DEPTH, width, height, nullptr, GL_NEAREST);
+			textureFlux     = render.CreateTexture2D(GL_RGBA32F, GL_RGBA, GL_FLOAT, width, height, nullptr, GL_LINEAR);
+			textureNormal   = render.CreateTexture2D(GL_RGBA32F, GL_RGBA, GL_FLOAT, width, height, nullptr, GL_LINEAR);
+			texturePosition = render.CreateTexture2D(GL_RGBA32F, GL_RGBA, GL_FLOAT, width, height, nullptr, GL_LINEAR);
 
-			fbo = render.CreateFramebuffer({ textureFlux, textureNormal, texturePosition }, textureDepth);
+			fbo = render.CreateFramebuffer({ textureFlux, textureNormal, texturePosition });
 		}
 
 		void Destroy()
@@ -86,7 +87,6 @@ namespace
 			textureFlux.reset();
 			textureNormal.reset();
 			texturePosition.reset();
-			textureDepth.reset();
 
 			fbo.reset();
 		}
@@ -107,13 +107,11 @@ namespace
 		GLTextureRef textureFlux = nullptr;
 		GLTextureRef textureNormal = nullptr;
 		GLTextureRef texturePosition = nullptr;
-		GLTextureRef textureDepth = nullptr;
 
 		int width = 0;
 		int height = 0;
 
 		int rsmResolution = 256; // 1024
-		glm::vec3 directionalLightDirection = glm::vec3(-1.0f); // TODO: временно
 	};
 
 	struct ShadingWithRSMPass
@@ -124,8 +122,7 @@ namespace
 
 			initVPLsSampleCoordsAndWeights();
 
-			// TODO: нет поддержи формата текстур GL_FLOAT - возможно нужно тут
-			texture = render.CreateTexture2D(GL_RGBA32F, GL_RGBA, inWidth, inHeight, nullptr, GL_NEAREST);
+			texture = render.CreateTexture2D(GL_RGBA32F, GL_RGBA, GL_FLOAT, inWidth, inHeight, nullptr, GL_LINEAR);
 
 			std::vector<int> LocalGroupSize;
 			LocalGroupSize.resize(3);
@@ -227,25 +224,26 @@ out outBlock
 	vec3 FragPosInViewSpace; // POSITION
 	vec3 Color;
 	vec3 Normal;
-	vec2 TexCoords;
+	vec2 TexCoord;
 } o;
 
-layout (location = 0) in vec3 pos;
-layout (location = 1) in vec3 col;
-layout (location = 2) in vec3 nrm;
-layout (location = 3) in vec2 uvs;
+layout (location = 0) in vec3 Position;
+layout (location = 1) in vec3 Color;
+layout (location = 2) in vec3 Normal;
+layout (location = 3) in vec2 TexCoord;
 
-layout (location = 0) uniform mat4 proj;
-layout (location = 1) uniform mat4 view;
-layout (location = 2) uniform mat4 modl;
+layout (location = 0) uniform mat4 ProjectionMatrix;
+layout (location = 1) uniform mat4 ViewMatrix;
+layout (location = 2) uniform mat4 WorldMatrix;
 
 void main()
 {
-	const vec4 FragPosInViewSpace = view * modl * vec4(pos, 1.0);
-	gl_Position = proj * FragPosInViewSpace;
-	o.Color = col;
-	o.TexCoords = uvs;
-	o.Normal = normalize(mat3(transpose(inverse(view * modl))) * nrm);
+	const mat4 VWMatrix = ViewMatrix * WorldMatrix;
+	const vec4 FragPosInViewSpace = VWMatrix * vec4(Position, 1.0);
+	gl_Position = ProjectionMatrix * FragPosInViewSpace;
+	o.Color = Color;
+	o.TexCoord = TexCoord;
+	o.Normal = normalize(mat3(transpose(inverse(VWMatrix))) * Normal);
 	o.FragPosInViewSpace = FragPosInViewSpace.xyz;
 }
 		)";
@@ -259,7 +257,7 @@ in inBlock
 	vec3 FragPosInViewSpace;
 	vec3 Color;
 	vec3 Normal;
-	vec2 TexCoords;
+	vec2 TexCoord;
 } i;
 
 layout (location = 0) out vec3 outPosition;
@@ -274,7 +272,7 @@ layout(binding = 0) uniform sampler2D DiffuseTexture;
 
 void main()
 {
-	vec4 diffuseTex = texture(DiffuseTexture, i.TexCoords);
+	vec4 diffuseTex = texture(DiffuseTexture, i.TexCoord);
 
 	outPosition = i.FragPosInViewSpace;
 	outNormal = i.Normal;
@@ -304,10 +302,9 @@ layout (location = 1) in vec3 Color;
 layout (location = 2) in vec3 Normal;
 layout (location = 3) in vec2 TexCoords;
 
-layout (location = 0) uniform mat4 projectionMatrix;
-layout (location = 1) uniform mat4 viewMatrix;
-layout (location = 2) uniform mat4 modelMatrix;
-layout (location = 3) uniform mat4 lightVPMatrix;
+layout (location = 0) uniform mat4 viewMatrix;
+layout (location = 1) uniform mat4 modelMatrix;
+layout (location = 2) uniform mat4 lightVPMatrix;
 
 void main()
 {
@@ -428,7 +425,6 @@ void main()
 		)";
 #pragma endregion
 
-
 #pragma region MainShader
 	const char* MainVertSource = R"(
 #version 460
@@ -487,8 +483,6 @@ void main()
 }
 )";
 #pragma endregion
-
-
 
 #pragma region oldMainShader
 	const char* oldMainVertSource = R"(
@@ -609,8 +603,6 @@ void main()
 }
 )";
 #pragma endregion
-
-
 	
 #pragma endregion
 }
@@ -630,8 +622,6 @@ void DemoApp001::Run()
 	graphics.Create({});
 	mainGUI.Create({});
 
-	//graphics.RegisterObject(std::make_shared<DA001_HalfCornellBox>(systems, "HalfCornellBox", 1));
-
 	m_perspective = glm::perspective(glm::radians(60.0f), (float)window.GetWidth() / (float)window.GetHeight(), 0.1f, 1000.f);
 	glViewport(0, 0, window.GetWidth(), window.GetHeight());
 
@@ -646,36 +636,6 @@ void DemoApp001::Run()
 	//GLProgramPipelineRef oldppMain = render.CreateProgramPipelineFromSources(oldMainVertSource, oldMainFragSource);
 	GLProgramPipelineRef ppMain = render.CreateProgramPipelineFromSources(MainVertSource, MainFragSource);
 	GLProgramPipelineRef rsmComputeShader = render.CreateProgramPipelineFromSources(RSMComputeSource);
-
-	constexpr auto uniform_projection = 0;
-	constexpr auto uniform_view = 1;
-	constexpr auto uniform_modl = 2;
-
-	// rsm vertex
-	constexpr auto uniform_RSM_lightVPMatrix = 3;
-
-	// rsm fragment
-	constexpr auto uniform_RSM_light_color = 0;
-
-	// main vertex
-	constexpr auto uniform_cam_dir = 0;
-	constexpr auto uniform_fov = 1;
-	constexpr auto uniform_aspect = 2;
-	constexpr auto uniform_uvs_diff = 3;
-
-	// main fragment
-	constexpr auto uniform_cam_pos = 0;
-	constexpr auto uniform_light_col = 1;
-	constexpr auto uniform_light_pos = 2;
-
-
-	//constexpr auto uniform_lght = 3;
-	//constexpr auto uniform_blur_bias = 0;
-
-	//constexpr auto uniform_mvp = 3;
-	//constexpr auto uniform_mvp_inverse = 4;
-	//constexpr auto uniform_blur_except = 5;
-	//constexpr auto uniform_emissive_strength = 0;
 
 #pragma region deltaTime
 	int fpsCount = 0;
@@ -694,21 +654,11 @@ void DemoApp001::Run()
 	FinalFrameBuffer finalFB;
 	finalFB.Create(render, window.GetWidth(), window.GetHeight());
 
-
-	GLTextureRef textureSkybox = render.CreateTextureCubeFromFile({
-			"data/textures/TC_AboveClouds_Xn.png",
-			"data/textures/TC_AboveClouds_Xp.png",
-			"data/textures/TC_AboveClouds_Yn.png",
-			"data/textures/TC_AboveClouds_Yp.png",
-			"data/textures/TC_AboveClouds_Zn.png",
-			"data/textures/TC_AboveClouds_Zp.png"
-		});
-
 	constexpr auto fov = glm::radians(60.0f);
-	static glm::vec3 light_pos = glm::vec3(0.0, 4.0, 0.0);
-
 	// RSM
-	glm::vec3 LightPos = glm::vec3(-0.15f, -1.13f, -0.58);
+	//glm::vec3 LightPos = glm::vec3(-0.15f, -1.13f, -0.58);
+	glm::vec3 LightPos = glm::vec3(0.0, 4.0, 0.0);
+
 	glm::vec3 LightDir = glm::normalize(glm::vec3(-1.0f, -0.7071f, 0.0f));
 	glm::mat4 LightViewMatrix = glm::lookAt(LightPos, LightPos + LightDir, glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 LightProjectionMatrix = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, 0.1f, 10.0f);
@@ -826,9 +776,9 @@ void DemoApp001::Run()
 			{
 				gbuffer.Bind(render);
 				render.Bind(ppGBuffer);
-				render.SetUniform(ppGBuffer->GetVertexShader(), uniform_projection, m_perspective);
-				render.SetUniform(ppGBuffer->GetVertexShader(), uniform_view, m_camera.GetViewMatrix());
-				render.SetUniform(ppGBuffer->GetVertexShader(), uniform_modl, glm::mat4(1.0f));
+				render.SetUniform(ppGBuffer->GetVertexShader(), 0, m_perspective);
+				render.SetUniform(ppGBuffer->GetVertexShader(), 1, m_camera.GetViewMatrix());
+				render.SetUniform(ppGBuffer->GetVertexShader(), 2, glm::mat4(1.0f));
 				model->Update(ppGBuffer);
 			}
 
@@ -836,10 +786,9 @@ void DemoApp001::Run()
 			{
 				rsmBuffer.Bind(render);
 				render.Bind(ppRSMBuffer);
-				render.SetUniform(ppRSMBuffer->GetVertexShader(), uniform_projection, m_perspective);
-				render.SetUniform(ppRSMBuffer->GetVertexShader(), uniform_view, m_camera.GetViewMatrix());
-				render.SetUniform(ppRSMBuffer->GetVertexShader(), uniform_modl, glm::mat4(1.0f));
-				render.SetUniform(ppRSMBuffer->GetVertexShader(), uniform_RSM_lightVPMatrix, LightVPMatrix);
+				render.SetUniform(ppRSMBuffer->GetVertexShader(), 0, m_camera.GetViewMatrix());
+				render.SetUniform(ppRSMBuffer->GetVertexShader(), 1, glm::mat4(1.0f));
+				render.SetUniform(ppRSMBuffer->GetVertexShader(), 2, LightVPMatrix);
 				model->Update(ppRSMBuffer);
 			}
 

@@ -261,6 +261,11 @@ GLTextureRef RenderSystem::CreateTexture2D()
 //-----------------------------------------------------------------------------
 GLTextureRef RenderSystem::CreateTexture2D(GLenum internalFormat, GLenum format, GLsizei width, GLsizei height, void* data, GLenum filter, GLenum repeat, bool generateMipMaps)
 {
+	return CreateTexture2D(internalFormat, format, GL_UNSIGNED_BYTE, width, height, data, filter, repeat, generateMipMaps);
+}
+//-----------------------------------------------------------------------------
+GLTextureRef RenderSystem::CreateTexture2D(GLenum internalFormat, GLenum format, GLenum dataType, GLsizei width, GLsizei height, void* data, GLenum filter, GLenum repeat, bool generateMipMaps)
+{
 	auto texture = CreateTexture2D();
 	if (!IsValid(texture)) return nullptr;
 
@@ -290,9 +295,9 @@ GLTextureRef RenderSystem::CreateTexture2D(GLenum internalFormat, GLenum format,
 	glTextureParameteri(*texture, GL_TEXTURE_WRAP_R, repeat);
 
 	if (data)
-		glTextureSubImage2D(*texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
+		glTextureSubImage2D(*texture, 0, 0, 0, width, height, format, dataType, data);
 
-	if (generateMipMaps) 
+	if (generateMipMaps)
 		glGenerateTextureMipmap(*texture);
 
 	return texture;

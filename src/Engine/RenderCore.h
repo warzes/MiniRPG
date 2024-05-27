@@ -318,17 +318,25 @@ enum class PrimitiveTopology : uint8_t
 
 enum class TextureType : uint8_t
 {
-#if !PLATFORM_EMSCRIPTEN
 	Texture1D,
-#endif
 	Texture2D,
 	Texture3D,
-#if !PLATFORM_EMSCRIPTEN
 	TextureRectangle,
 	Texture1DArray,
-#endif
 	Texture2DArray,
 	TextureCubeMap,
+	TextureCubeMapArray,
+	DepthCubeMap
+};
+
+enum class TextureAttachmentType : uint8_t
+{
+	ColorTexture,
+	DepthTexture,
+	CubeDepthTexture,
+	StencilTexture,
+	DepthAndStencilTexture,
+	DepthArrayTexture
 };
 
 enum class TextureMinFilter : uint8_t
@@ -382,6 +390,25 @@ enum class TextureCubeTarget : uint8_t
 	TextureCubeMapNegativeY,
 	TextureCubeMapPositiveZ,
 	TextureCubeMapNegativeZ
+};
+
+struct TextureCreateInfo final
+{
+	GLint internalFormat = GL_RGBA;
+	GLenum externalFormat = GL_RGBA;
+	GLenum dataType = GL_UNSIGNED_BYTE;
+	GLsizei width = 512;
+	GLsizei height = 512;
+	GLsizei depth = 1;
+	std::vector<void*> dataSet;
+	GLint type4WrapS = GL_REPEAT;
+	GLint type4WrapT = GL_REPEAT;
+	GLint type4WrapR = GL_REPEAT;
+	GLint type4MinFilter = GL_LINEAR;
+	GLint type4MagFilter = GL_LINEAR;
+	std::vector<float> borderColor = { 1,1,1,1 };
+	bool generateMipMaps = false;
+	bool isSRGBSpace = false;
 };
 
 //=============================================================================
@@ -847,17 +874,15 @@ struct BlendState final
 {
 	switch (type)
 	{
-#if !PLATFORM_EMSCRIPTEN
-	case TextureType::Texture1D:        return GL_TEXTURE_1D;
-#endif
-	case TextureType::Texture2D:        return GL_TEXTURE_2D;
-	case TextureType::Texture3D:        return GL_TEXTURE_3D;
-#if !PLATFORM_EMSCRIPTEN
-	case TextureType::TextureRectangle: return GL_TEXTURE_RECTANGLE;
-	case TextureType::Texture1DArray:   return GL_TEXTURE_1D_ARRAY;
-#endif
-	case TextureType::Texture2DArray:   return GL_TEXTURE_2D_ARRAY;
-	case TextureType::TextureCubeMap:   return GL_TEXTURE_CUBE_MAP;
+	case TextureType::Texture1D:           return GL_TEXTURE_1D;
+	case TextureType::Texture2D:           return GL_TEXTURE_2D;
+	case TextureType::Texture3D:           return GL_TEXTURE_3D;
+	case TextureType::TextureRectangle:    return GL_TEXTURE_RECTANGLE;
+	case TextureType::Texture1DArray:      return GL_TEXTURE_1D_ARRAY;
+	case TextureType::Texture2DArray:      return GL_TEXTURE_2D_ARRAY;
+	case TextureType::TextureCubeMap:      return GL_TEXTURE_CUBE_MAP;
+	case TextureType::TextureCubeMapArray: return GL_TEXTURE_CUBE_MAP_ARRAY;
+	case TextureType::DepthCubeMap:        return GL_DEPTH_COMPONENT;
 	default: break;
 	}
 	assert(false && "Unknown TextureType");

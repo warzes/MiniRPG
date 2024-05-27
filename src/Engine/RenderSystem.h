@@ -62,6 +62,9 @@ public:
 
 	GLTextureRef CreateTexture2D();
 	GLTextureRef CreateTexture2D(GLenum internalFormat, GLenum format, GLsizei width, GLsizei height, void* data = nullptr, GLenum filter = GL_LINEAR, GLenum repeat = GL_REPEAT, bool generateMipMaps = false);
+	GLTextureRef CreateTexture2D(GLenum internalFormat, GLenum format, GLenum dataType, GLsizei width, GLsizei height, void* data = nullptr, GLenum filter = GL_LINEAR, GLenum repeat = GL_REPEAT, bool generateMipMaps = false);
+
+
 	GLTextureRef CreateTexture2DFromFile(std::string_view filepath, int comp = STBI_rgb_alpha, bool generateMipMaps = false);
 
 	GLTextureRef CreateTextureCube();

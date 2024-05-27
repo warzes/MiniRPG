@@ -12,12 +12,6 @@
     <ClCompile Include="GMesh.cpp" />
     <ClCompile Include="GModel.cpp" />
     <ClCompile Include="RenderPass.cpp" />
-    <ClCompile Include="DA001_GBufferPass.cpp">
-      <Filter>001 Reflective shadow map</Filter>
-    </ClCompile>
-    <ClCompile Include="DA001_HalfCornellBox.cpp">
-      <Filter>001 Reflective shadow map</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameApp.h" />
@@ -31,12 +25,6 @@
     <ClInclude Include="GMesh.h" />
     <ClInclude Include="GModel.h" />
     <ClInclude Include="RenderPass.h" />
-    <ClInclude Include="DA001_GBufferPass.h">
-      <Filter>001 Reflective shadow map</Filter>
-    </ClInclude>
-    <ClInclude Include="DA001_HalfCornellBox.h">
-      <Filter>001 Reflective shadow map</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="001 Reflective shadow map">
