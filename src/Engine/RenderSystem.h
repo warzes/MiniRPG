@@ -33,7 +33,9 @@ public:
 
 	GLProgramPipelineRef CreateProgramPipeline();
 	GLProgramPipelineRef CreateProgramPipeline(GLSeparableShaderProgramRef vertexShader, GLSeparableShaderProgramRef fragmentShader);
+	GLProgramPipelineRef CreateProgramPipeline(GLSeparableShaderProgramRef computeShader);
 	GLProgramPipelineRef CreateProgramPipelineFromSources(std::string_view vertSource, std::string_view fragSource);
+	GLProgramPipelineRef CreateProgramPipelineFromSources(std::string_view computeSource);
 	GLProgramPipelineRef CreateProgramPipelineFromFiles(std::string_view vertFilepath, std::string_view fragFilepath);
 
 	GLBufferRef CreateBuffer();
@@ -88,6 +90,7 @@ public:
 	void SetUniform(GLSeparableShaderProgramRef shader, GLint location, const T& value);
 
 	void ProgramPipelineSetSeparableShaders(GLProgramPipelineRef pipeline, GLSeparableShaderProgramRef vertexShader, GLSeparableShaderProgramRef fragmentShader);
+	void ProgramPipelineSetSeparableShaders(GLProgramPipelineRef pipeline, GLSeparableShaderProgramRef computeShader);
 
 	// внимание: можно вызвать только один раз и только для пустого буфера (проверить), также нельзя использовать BufferSetData(). в будущем сделать проверку. переделать этот комментарий под общий для трех функций
 	template<typename T>

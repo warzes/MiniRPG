@@ -42,6 +42,7 @@ public:
 
 	GLSeparableShaderProgramRef GetVertexShader() { return m_vertexShader; }
 	GLSeparableShaderProgramRef GetFragmentShader() { return m_fragmentShader; }
+	GLSeparableShaderProgramRef GetComputeShader() { return m_computeShader; }
 
 private:
 	void createHandle();
@@ -50,6 +51,7 @@ private:
 	GLuint m_handle = 0;
 	GLSeparableShaderProgramRef m_vertexShader = nullptr;
 	GLSeparableShaderProgramRef m_fragmentShader = nullptr;
+	GLSeparableShaderProgramRef m_computeShader = nullptr;
 
 };
 using GLProgramPipelineRef = std::shared_ptr<GLProgramPipeline>;

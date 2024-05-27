@@ -13,6 +13,7 @@ namespace
 			width = inWidth;
 			height = inHeight;
 
+			// TODO: нет поддержи формата текстур GL_FLOAT - возможно нужно тут
 			textureGBufferPosition = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
 			textureGBufferNormal = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
 			textureGBufferAlbedo = render.CreateTexture2D(GL_RGBA16F, GL_RGBA, width, height, nullptr, GL_NEAREST);
@@ -71,6 +72,7 @@ namespace
 			width = inWidth;
 			height = inHeight;
 
+			// TODO: нет поддержи формата текстур GL_FLOAT - возможно нужно тут
 			textureFlux     = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
 			textureNormal   = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
 			texturePosition = render.CreateTexture2D(GL_RGB16F, GL_RGB, width, height, nullptr, GL_NEAREST);
@@ -113,6 +115,74 @@ namespace
 		int rsmResolution = 256; // 1024
 		glm::vec3 directionalLightDirection = glm::vec3(-1.0f); // TODO: временно
 	};
+
+	struct ShadingWithRSMPass
+	{
+		void Create(RenderSystem& render, int inWidth, int inHeight, GLProgramPipelineRef shader)
+		{
+			Destroy();
+
+			initVPLsSampleCoordsAndWeights();
+
+			// TODO: нет поддержи формата текстур GL_FLOAT - возможно нужно тут
+			texture = render.CreateTexture2D(GL_RGBA32F, GL_RGBA, inWidth, inHeight, nullptr, GL_NEAREST);
+
+			std::vector<int> LocalGroupSize;
+			LocalGroupSize.resize(3);
+			glGetProgramiv(*shader->GetComputeShader(), GL_COMPUTE_WORK_GROUP_SIZE, LocalGroupSize.data());
+			globalGroupSize.push_back((inWidth + LocalGroupSize[0] - 1) / LocalGroupSize[0]);
+			globalGroupSize.push_back((inHeight + LocalGroupSize[1] - 1) / LocalGroupSize[1]);
+			globalGroupSize.push_back(1);
+		}
+
+		void Destroy()
+		{
+			texture.reset();
+			globalGroupSize.clear();
+			VPLsSampleCoordsAndWeights.clear();
+		}
+
+		void Bind(RenderSystem& render)
+		{
+		}
+
+		void initVPLsSampleCoordsAndWeights()
+		{
+			std::default_random_engine e;
+			std::uniform_real_distribution<float> u(0, 1);
+			for (size_t i = 0; i < VPLNum; i++)
+			{
+				float xi1 = u(e);
+				float xi2 = u(e);
+				VPLsSampleCoordsAndWeights.push_back({ xi1 * sin(2 * glm::pi<float>() * xi2), xi1 * cos(2 * glm::pi<float>() * xi2), xi1 * xi1, 0 });
+			}
+			uniformBuffer = genUniformBuffer(GL_UNIFORM_BUFFER, VPLsSampleCoordsAndWeights.size() * 4 * sizeof(GL_FLOAT), VPLsSampleCoordsAndWeights.data(), GL_STATIC_DRAW, 0);
+		}
+
+		GLuint genUniformBuffer(GLenum target, GLsizeiptr size, const void* data, GLenum usage, GLint bindingIndex) // TODO: переделать
+		{
+			GLuint buffer;
+			glGenBuffers(1, &buffer);
+			glBindBuffer(target, buffer);
+			glBufferData(target, size, data, usage);
+			glBindBuffer(target, 0);
+			if (bindingIndex != -1)
+				glBindBufferBase(target, bindingIndex, buffer);
+			return buffer;
+		}
+
+
+		std::vector<int> globalGroupSize;
+		std::vector<glm::vec4> VPLsSampleCoordsAndWeights;
+		int VPLNum = 32;
+		float MaxSampleRadius = 25;
+		//glm::mat4 LightVPMatrix;
+		glm::vec4 LightDir;
+
+		GLTextureRef texture = nullptr;
+		GLuint uniformBuffer;
+	};
+
 
 	struct FinalFrameBuffer
 	{
@@ -214,7 +284,6 @@ void main()
 		)";
 #pragma endregion
 
-
 #pragma region RSMShader
 	const char* rsmVertSource = R"(
 #version 460
@@ -282,6 +351,144 @@ void main()
 }
 		)";
 #pragma endregion
+
+#pragma region ComputeRSMShader
+	const char* RSMComputeSource = R"(
+#version 460
+#pragma debug(on)
+#pragma optionNV (unroll all)
+
+#define LOCAL_GROUP_SIZE 16
+#define VPL_NUM 32
+
+layout (local_size_x = LOCAL_GROUP_SIZE, local_size_y = LOCAL_GROUP_SIZE) in;
+
+layout (rgba32f, binding = 0) uniform writeonly image2D u_OutputImage;
+
+layout(std140, binding = 0) uniform VPLsSampleCoordsAndWeights
+{
+	vec4 u_VPLsSampleCoordsAndWeights[VPL_NUM];
+};
+
+uniform sampler2D u_AlbedoTexture;
+uniform sampler2D u_NormalTexture;
+uniform sampler2D u_PositionTexture;
+uniform sampler2D u_RSMFluxTexture;
+uniform sampler2D u_RSMNormalTexture;
+uniform sampler2D u_RSMPositionTexture;
+
+layout (location = 1) uniform mat4  u_LightVPMatrixMulInverseCameraViewMatrix; // TODO: 1 retype
+layout (location = 2) uniform float u_MaxSampleRadius;
+layout (location = 3) uniform int   u_RSMSize;
+layout (location = 4) uniform int   u_VPLNum;
+layout (location = 5) uniform vec3  u_LightDirInViewSpace;
+
+vec3 calcVPLIrradiance(vec3 vVPLFlux, vec3 vVPLNormal, vec3 vVPLPos, vec3 vFragPos, vec3 vFragNormal, float vWeight)
+{
+	vec3 VPL2Frag = normalize(vFragPos - vVPLPos);
+	return vVPLFlux * max(dot(vVPLNormal, VPL2Frag), 0) * max(dot(vFragNormal, -VPL2Frag), 0) * vWeight;
+}
+
+void main()
+{
+	if(u_VPLNum != VPL_NUM)
+		return;
+
+	ivec2 FragPos = ivec2(gl_GlobalInvocationID.xy);
+	vec3 FragViewNormal = normalize(texelFetch(u_NormalTexture, FragPos, 0).xyz);
+	vec3 FragAlbedo = texelFetch(u_AlbedoTexture, FragPos, 0).xyz;
+	vec3 FragViewPos = texelFetch(u_PositionTexture, FragPos, 0).xyz;
+
+	vec4 FragPosInLightSpace = u_LightVPMatrixMulInverseCameraViewMatrix * vec4(FragViewPos, 1);
+	FragPosInLightSpace /= FragPosInLightSpace.w;
+	vec2 FragNDCPos4Light = (FragPosInLightSpace.xy + 1) / 2;
+	float RSMTexelSize = 1.0 / u_RSMSize;
+	vec3 DirectIllumination;
+	if(FragPosInLightSpace.z < 0.0f || FragPosInLightSpace.x > 1.0f || FragPosInLightSpace.y > 1.0f || FragPosInLightSpace.x < 0.0f || FragPosInLightSpace.y < 0.0f )
+		DirectIllumination = vec3(0.1) * FragAlbedo;
+	else
+		DirectIllumination = FragAlbedo * max(dot(-u_LightDirInViewSpace, FragViewNormal), 0.1);
+	vec3 IndirectIllumination = vec3(0);
+	for(int i = 0; i < u_VPLNum; ++i)
+	{
+		vec3 VPLSampleCoordAndWeight = u_VPLsSampleCoordsAndWeights[i].xyz;
+		vec2 VPLSamplePos = FragNDCPos4Light + u_MaxSampleRadius * VPLSampleCoordAndWeight.xy * RSMTexelSize;
+		vec3 VPLFlux = texture(u_RSMFluxTexture, VPLSamplePos).xyz;
+		vec3 VPLNormalInViewSpace = normalize(texture(u_RSMNormalTexture, VPLSamplePos).xyz);
+		vec3 VPLPositionInViewSpace = texture(u_RSMPositionTexture, VPLSamplePos).xyz;
+
+		IndirectIllumination += calcVPLIrradiance(VPLFlux, VPLNormalInViewSpace, VPLPositionInViewSpace, FragViewPos, FragViewNormal, VPLSampleCoordAndWeight.z);
+	}
+	IndirectIllumination *= FragAlbedo;
+
+	vec3 Result = DirectIllumination  + IndirectIllumination / u_VPLNum;
+
+	imageStore(u_OutputImage, FragPos, vec4(Result, 1.0));
+}
+		)";
+#pragma endregion
+
+
+#pragma region MainShader
+	const char* MainVertSource = R"(
+#version 460
+#pragma debug(on)
+
+out gl_PerVertex { vec4 gl_Position; };
+
+out outBlock
+{
+	vec2 texcoord;
+} o;
+
+void main()
+{
+	vec2 v[] = {
+		vec2(-1.0f, 1.0f),
+		vec2(1.0f, 1.0f),
+		vec2(1.0f,-1.0f),
+		vec2(-1.0f,-1.0f)
+	};
+	vec2 t[] = {
+		vec2(0.0f, 1.0f),
+		vec2(1.0f, 1.0f),
+		vec2(1.0f, 0.0f),
+		vec2(0.0f, 0.0f)
+
+	};
+	uint i[] = { 0, 3, 2, 2, 1, 0 };
+
+	const vec2 position = v[i[gl_VertexID]];
+	const vec2 texcoord = t[i[gl_VertexID]];
+
+	o.texcoord = texcoord;
+	gl_Position = vec4(position, 0.0, 1.0);
+}
+)";
+
+	const char* MainFragSource = R"(
+#version 460
+#pragma debug(on)
+
+layout (location = 0) out vec4 outColor;
+
+layout (binding = 0) uniform sampler2D computeTexture;
+
+in in_block
+{
+	vec2 texcoord;
+} i;
+
+void main()
+{
+	vec3 TexelColor = texture(computeTexture, i.texcoord).rgb;
+	TexelColor = pow(TexelColor, vec3(1.0f/2.2f));
+	outColor = vec4(TexelColor, 1.0f);
+}
+)";
+#pragma endregion
+
+
 
 #pragma region oldMainShader
 	const char* oldMainVertSource = R"(
@@ -436,7 +643,10 @@ void DemoApp001::Run()
 
 	GLProgramPipelineRef ppGBuffer = render.CreateProgramPipelineFromSources(gbufferVertSource, gbufferFragSource);
 	GLProgramPipelineRef ppRSMBuffer = render.CreateProgramPipelineFromSources(rsmVertSource, rsmFragSource);
-	GLProgramPipelineRef oldppMain = render.CreateProgramPipelineFromSources(oldMainVertSource, oldMainFragSource);
+	//GLProgramPipelineRef oldppMain = render.CreateProgramPipelineFromSources(oldMainVertSource, oldMainFragSource);
+	GLProgramPipelineRef ppMain = render.CreateProgramPipelineFromSources(MainVertSource, MainFragSource);
+	GLProgramPipelineRef rsmComputeShader = render.CreateProgramPipelineFromSources(RSMComputeSource);
+
 	constexpr auto uniform_projection = 0;
 	constexpr auto uniform_view = 1;
 	constexpr auto uniform_modl = 2;
@@ -479,8 +689,11 @@ void DemoApp001::Run()
 	gbuffer.Create(render, window.GetWidth(), window.GetHeight());
 	RSMBuffer rsmBuffer;
 	rsmBuffer.Create(render, window.GetWidth(), window.GetHeight());
+	ShadingWithRSMPass rsmCompute;
+	rsmCompute.Create(render, window.GetWidth(), window.GetHeight(), rsmComputeShader);
 	FinalFrameBuffer finalFB;
 	finalFB.Create(render, window.GetWidth(), window.GetHeight());
+
 
 	GLTextureRef textureSkybox = render.CreateTextureCubeFromFile({
 			"data/textures/TC_AboveClouds_Xn.png",
@@ -630,32 +843,69 @@ void DemoApp001::Run()
 				model->Update(ppRSMBuffer);
 			}
 
+			// Compute RSM
+			{
+				render.Bind(rsmComputeShader);
+				glBindImageTexture(0, *rsmCompute.texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F); // куда рисовать
+				render.BindSlot(gbuffer.textureGBufferAlbedo, 0);
+				render.BindSlot(gbuffer.textureGBufferNormal, 1);
+				render.BindSlot(gbuffer.textureGBufferPosition, 2);
+				render.BindSlot(rsmBuffer.textureFlux, 3);
+				render.BindSlot(rsmBuffer.textureNormal, 4);
+				render.BindSlot(rsmBuffer.texturePosition, 5);
+
+				glBindBuffer(GL_UNIFORM_BUFFER, rsmCompute.uniformBuffer);
+
+				glm::mat4 lightVPMatrixMulInverseCameraViewMatrix = LightVPMatrix * glm::inverse(m_camera.GetViewMatrix());
+				render.SetUniform(rsmComputeShader->GetComputeShader(), 1, lightVPMatrixMulInverseCameraViewMatrix);
+				render.SetUniform(rsmComputeShader->GetComputeShader(), 2, rsmCompute.MaxSampleRadius);
+				render.SetUniform(rsmComputeShader->GetComputeShader(), 3, rsmBuffer.rsmResolution);
+				render.SetUniform(rsmComputeShader->GetComputeShader(), 4, rsmCompute.VPLNum);
+				glm::vec3 lightDirInViewSpace = glm::normalize(glm::vec3(m_camera.GetViewMatrix() * glm::vec4(LightDir, 0.0f)));
+				render.SetUniform(rsmComputeShader->GetComputeShader(), 5, lightDirInViewSpace);
+
+				glDispatchCompute(rsmCompute.globalGroupSize[0], rsmCompute.globalGroupSize[1], rsmCompute.globalGroupSize[2]);
+				glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+				glBindBuffer(GL_UNIFORM_BUFFER, 0);
+			}
+
 			// Final Frame
 			{
 				finalFB.Bind(render);
-				render.BindSlot(gbuffer.textureGBufferPosition, 0);
-				render.BindSlot(gbuffer.textureGBufferNormal, 1);
-				render.BindSlot(gbuffer.textureGBufferAlbedo, 2);
-				render.BindSlot(gbuffer.textureGBufferDepth, 3);
-				//render.BindSlot(gbuffer.textureGBufferEmissive, 4);
-				render.BindSlot(textureSkybox, 4);
-
-				render.Bind(oldppMain);
-				render.SetUniform(oldppMain->GetVertexShader(), uniform_cam_dir, glm::inverse(glm::mat3(m_camera.GetViewMatrix())));
-				render.SetUniform(oldppMain->GetVertexShader(), uniform_fov, fov);
-				render.SetUniform(oldppMain->GetVertexShader(), uniform_aspect, float(window.GetWidth()) / float(window.GetHeight()));
-				render.SetUniform(oldppMain->GetVertexShader(), uniform_uvs_diff, glm::vec2(
-					float(window.GetWidth()) / float(window.GetWidth()),
-					float(window.GetHeight()) / float(window.GetHeight())
-				));
-
-				render.SetUniform(oldppMain->GetFragmentShader(), uniform_cam_pos, m_camera.position);
-				render.SetUniform(oldppMain->GetFragmentShader(), uniform_light_col, glm::vec3(1.0));
-				render.SetUniform(oldppMain->GetFragmentShader(), uniform_light_pos, light_pos);
-
+				render.Bind(ppMain);
+				render.BindSlot(rsmCompute.texture, 0);
 				render.Bind(VAOEmpty);
 				glDrawArrays(GL_TRIANGLES, 0, 6);
 			}
+
+
+			//// Old Final Frame
+			//{
+			//	finalFB.Bind(render);
+			//	render.BindSlot(gbuffer.textureGBufferPosition, 0);
+			//	render.BindSlot(gbuffer.textureGBufferNormal, 1);
+			//	render.BindSlot(gbuffer.textureGBufferAlbedo, 2);
+			//	render.BindSlot(gbuffer.textureGBufferDepth, 3);
+			//	//render.BindSlot(gbuffer.textureGBufferEmissive, 4);
+			//	render.BindSlot(textureSkybox, 4);
+
+			//	render.Bind(oldppMain);
+			//	render.SetUniform(oldppMain->GetVertexShader(), uniform_cam_dir, glm::inverse(glm::mat3(m_camera.GetViewMatrix())));
+			//	render.SetUniform(oldppMain->GetVertexShader(), uniform_fov, fov);
+			//	render.SetUniform(oldppMain->GetVertexShader(), uniform_aspect, float(window.GetWidth()) / float(window.GetHeight()));
+			//	render.SetUniform(oldppMain->GetVertexShader(), uniform_uvs_diff, glm::vec2(
+			//		float(window.GetWidth()) / float(window.GetWidth()),
+			//		float(window.GetHeight()) / float(window.GetHeight())
+			//	));
+
+			//	render.SetUniform(oldppMain->GetFragmentShader(), uniform_cam_pos, m_camera.position);
+			//	render.SetUniform(oldppMain->GetFragmentShader(), uniform_light_col, glm::vec3(1.0));
+			//	render.SetUniform(oldppMain->GetFragmentShader(), uniform_light_pos, light_pos);
+
+			//	render.Bind(VAOEmpty);
+			//	glDrawArrays(GL_TRIANGLES, 0, 6);
+			//}
 
 			render.MainFrameBuffer();
 			render.BlitFrameBuffer(finalFB.fbo, nullptr,
@@ -669,7 +919,7 @@ void DemoApp001::Run()
 	}
 	ppRSMBuffer.reset();
 	rsmBuffer.Destroy();
-	oldppMain.reset();
+	ppMain.reset();
 	finalFB.Destroy();
 	ppGBuffer.reset();
 	gbuffer.Destroy();

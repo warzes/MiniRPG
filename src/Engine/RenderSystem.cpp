@@ -171,11 +171,31 @@ GLProgramPipelineRef RenderSystem::CreateProgramPipeline(GLSeparableShaderProgra
 	return resource;
 }
 //-----------------------------------------------------------------------------
+GLProgramPipelineRef RenderSystem::CreateProgramPipeline(GLSeparableShaderProgramRef computeShader)
+{
+	if (!IsValid(computeShader))
+	{
+		m_systems.log->Error("computeShader is null");
+		return nullptr;
+	}
+
+	auto resource = CreateProgramPipeline();
+	if (resource)
+		ProgramPipelineSetSeparableShaders(resource, computeShader);
+	return resource;
+}
+//-----------------------------------------------------------------------------
 GLProgramPipelineRef RenderSystem::CreateProgramPipelineFromSources(std::string_view vertSource, std::string_view fragSource)
 {
 	GLSeparableShaderProgramRef vertexShader = CreateSeparableShaderProgram(GL_VERTEX_SHADER, vertSource);
 	GLSeparableShaderProgramRef fragmentShader = CreateSeparableShaderProgram(GL_FRAGMENT_SHADER, fragSource);
 	return CreateProgramPipeline(vertexShader, fragmentShader);
+}
+//-----------------------------------------------------------------------------
+GLProgramPipelineRef RenderSystem::CreateProgramPipelineFromSources(std::string_view computeSource)
+{
+	GLSeparableShaderProgramRef computeShader = CreateSeparableShaderProgram(GL_COMPUTE_SHADER, computeSource);
+	return CreateProgramPipeline(computeShader);
 }
 //-----------------------------------------------------------------------------
 GLProgramPipelineRef RenderSystem::CreateProgramPipelineFromFiles(std::string_view vertFilepath, std::string_view fragFilepath)
@@ -388,6 +408,27 @@ void RenderSystem::ProgramPipelineSetSeparableShaders(GLProgramPipelineRef pipel
 
 	pipeline->m_vertexShader = vertexShader;
 	pipeline->m_fragmentShader = fragmentShader;
+}
+//-----------------------------------------------------------------------------
+void RenderSystem::ProgramPipelineSetSeparableShaders(GLProgramPipelineRef pipeline, GLSeparableShaderProgramRef computeShader)
+{
+	assert(IsValid(pipeline));
+	assert(IsValid(computeShader));
+
+	if (!IsValid(pipeline))
+	{
+		m_systems.log->Error("GLProgramPipelineRef is null");
+		return;
+	}
+	if (!IsValid(computeShader))
+	{
+		m_systems.log->Error("GLSeparableShaderProgramRef is null");
+		return;
+	}
+
+	glUseProgramStages(*pipeline, GL_COMPUTE_SHADER_BIT, *computeShader);
+
+	pipeline->m_computeShader = computeShader;
 }
 //-----------------------------------------------------------------------------
 void RenderSystem::ClearSubData(GLBufferRef buffer, const GLenum internalFormat, const GLintptr offset, const GLsizeiptr size, const GLenum format, const GLenum data_type, const void* data)
