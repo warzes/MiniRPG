@@ -10,9 +10,15 @@ Thumbs.db
 
 /bin/Log.txt
 
+#exe
 /bin/Game_Debug.*
 /bin/Game_Release.*
 /bin/DoomTest_Debug.*
 /bin/DoomTest_Release.*
 /bin/Demo_Debug.*
 /bin/Demo_Release.*
+
+#lessons
+/bin/BasicCube_Debug.*
+/bin/BasicCube_Release.*
+

@@ -30,5 +30,8 @@
     <Filter Include="001 Reflective shadow map">
       <UniqueIdentifier>{7d282a56-7a31-47ca-9cbe-0b57c9100e32}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Simple">
+      <UniqueIdentifier>{343ad050-1329-4627-b5ed-5f0ce7c09844}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>
